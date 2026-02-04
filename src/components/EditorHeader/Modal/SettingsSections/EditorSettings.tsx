@@ -1,0 +1,89 @@
+import { Switch, Typography, Button } from "@douyinfe/semi-ui";
+import { useTranslation } from "react-i18next";
+import { SettingItem } from "../Settings";
+
+const { Title } = Typography;
+
+interface EditorSettingsProps {
+  settings: Record<string, unknown>;
+  invertSettings: (setting: string) => void;
+  fitWindow: (margin?: number) => void;
+  resetSettingsPosition: () => void;
+}
+
+export default function EditorSettings({
+  settings,
+  invertSettings,
+  fitWindow,
+  resetSettingsPosition,
+}: EditorSettingsProps) {
+  const { t } = useTranslation();
+
+  return (
+    <section>
+      <Title heading={5} className="pb-6">
+        {(t as any)("editor_settings")}
+      </Title>
+      <div className="space-y-1">
+        <SettingItem id="setting_strict_mode" label={(t as any)("strict_mode")}>
+          <Switch
+            checked={settings.strictMode}
+            onChange={() => invertSettings("strictMode")}
+          />
+        </SettingItem>
+        <SettingItem id="setting_show_grid" label={(t as any)("show_grid")}>
+          <Switch
+            checked={settings.showGrid}
+            onChange={() => invertSettings("showGrid")}
+          />
+        </SettingItem>
+        <SettingItem id="setting_snap_to_grid" label={(t as any)("snap_to_grid")}>
+          <Switch
+            checked={settings.snapToGrid}
+            onChange={() => invertSettings("snapToGrid")}
+          />
+        </SettingItem>
+        <SettingItem id="setting_spread_relations" label={(t as any)("spread_relations")}>
+          <Switch
+            checked={settings.spreadRelations}
+            onChange={() => invertSettings("spreadRelations")}
+          />
+        </SettingItem>
+        <SettingItem id="setting_show_relationship_labels" label={(t as any)("show_relationship_labels")}>
+          <Switch
+            checked={settings.showRelationshipLabels}
+            onChange={() => invertSettings("showRelationshipLabels")}
+          />
+        </SettingItem>
+        <SettingItem id="setting_show_debug_coordinates" label={(t as any)("show_debug_coordinates")}>
+          <Switch
+            checked={settings.showDebugCoordinates}
+            onChange={() => invertSettings("showDebugCoordinates")}
+          />
+        </SettingItem>
+        <div className="grid grid-cols-2 gap-3 pt-6">
+          <Button
+            id="setting_fit_window_reset"
+            onClick={() => fitWindow(100)}
+            // @ts-ignore
+            theme="light"
+            {...( {} as any )}
+            className="col-span-2"
+            icon={<i className="bi bi-arrows-angle-expand mr-2" />}
+          >
+            {(t as any)("fit_window_reset")}
+          </Button>
+          <Button
+            onClick={resetSettingsPosition}
+            // @ts-ignore
+            theme="light"
+            {...( {} as any )}
+            className="col-span-2"
+          >
+            {(t as any)("reset_settings_position")}
+          </Button>
+        </div>
+      </div>
+    </section>
+  );
+}
