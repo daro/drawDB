@@ -1,0 +1,9 @@
+services:
+  drawdb-prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: drawdb_production
+    ports:
+      - "8081:8081"
+    restart: always
