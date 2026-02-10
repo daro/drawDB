@@ -1,0 +1,20 @@
+services:
+  drawdb-dev:
+    cpuset: "0-4"
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: drawdb-dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - WATCHPACK_POLLING=true
+    networks:
+      - default
+
+networks:
+  default:
+    driver: bridge

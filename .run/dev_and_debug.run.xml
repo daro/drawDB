@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Dev + Debug (Vite)" type="CompoundRunConfigurationType" factoryName="Compound">
+    <method v="2" />
+    <toRun name="npm: dev" type="js.build_tools.npm" />
+    <toRun name="Debug: Vite (http://localhost:5173)" type="JavaScriptDebugType" />
+  </configuration>
+</component>

@@ -1,0 +1,546 @@
+import { PathArray } from "svg-path-commander";
+import { PathCommander } from "../../utils/path/PathCommander";
+import { getNoteGeometry } from "../../utils/path/noteGeometry";
+import React, { useMemo, useState, useRef, useEffect, ReactNode } from "react";
+import { Action, ObjectType, Tab, State, NOTE_CONFIG } from "../../data/constants";
+import { Input, Button, Popover } from "@douyinfe/semi-ui";
+import ColorPicker from "../EditorSidePanel/ColorPicker";
+import {
+  IconEdit,
+  IconDeleteStroked,
+  IconLock,
+  IconUnlock,
+} from "@douyinfe/semi-icons";
+import {
+  useLayout,
+  useUndoRedo,
+  useSelect,
+  useNotes,
+  useSaveState,
+  useTransform,
+  useSettings,
+} from "../../hooks";
+import { useTranslation } from "react-i18next";
+// Removed duplicate import
+import ColorList from "../ColorList";
+import { INote, NoteProps } from "../../types";
+
+/**
+ * A component that renders a note on the canvas.
+ * Notes can be resized, edited, and contain arbitrary text.
+ * 
+ * @param {NoteProps} props - The component props.
+ * @returns {JSX.Element} The rendered note.
+ */
+function Note({ data, onPointerDown }: NoteProps) {
+  const [editField, setEditField] = useState<{ title?: string; content?: string; height?: number }>({});
+  const [hovered, setHovered] = useState(false);
+  const [resizing, setResizing] = useState(false);
+  const initialWidthRef = useRef(data.width ?? NOTE_CONFIG.WIDTH);
+  const initialXRef = useRef(data.x);
+  const { layout } = useLayout();
+  const { t } = useTranslation();
+  const { setSaveState } = useSaveState();
+  const { updateNote, deleteNote } = useNotes();
+  const { setUndoStack, setRedoStack } = useUndoRedo();
+  const { transform } = useTransform();
+  const { settings } = useSettings();
+  const {
+    selectedElement,
+    setSelectedElement,
+    bulkSelectedElements,
+    setBulkSelectedElements,
+  } = useSelect();
+  const initialColorRef = useRef(data.color);
+
+  const handleColorPick = (color: string) => {
+    setUndoStack((prev) => {
+      let undoColor = initialColorRef.current;
+      const lastColorChange = prev.findLast(
+        (e) =>
+          e.element === ObjectType.NOTE &&
+          e.nid === data.id &&
+          e.action === Action.EDIT &&
+          e.redo?.color,
+      );
+      if (lastColorChange) {
+        undoColor = lastColorChange.redo.color;
+      }
+
+      if (color === undoColor) return prev;
+
+      const newStack = [
+        ...prev,
+        {
+          action: Action.EDIT,
+          element: ObjectType.NOTE,
+          nid: data.id,
+          undo: { color: undoColor },
+          redo: { color: color },
+          message: t("edit_note", {
+            noteTitle: data.title,
+            extra: "[color]",
+          }),
+        },
+      ];
+      return newStack;
+    });
+    setRedoStack([]);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const textarea = document.getElementById(`note_${data.id}`) as HTMLTextAreaElement;
+    if (!textarea) return;
+    textarea.style.height = "0";
+    textarea.style.height = textarea.scrollHeight + "px";
+    const newHeight = textarea.scrollHeight + 42;
+    const updates: Partial<INote> = { content: e.target.value };
+    if (newHeight !== data.height) {
+      updates.height = newHeight;
+    }
+    updateNote(data.id, updates);
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLTextAreaElement>) => {
+    if (e.target.value === editField.content) return;
+    const textarea = document.getElementById(`note_${data.id}`) as HTMLTextAreaElement;
+    if (!textarea) return;
+    textarea.style.height = "0";
+    textarea.style.height = textarea.scrollHeight + "px";
+    const newHeight = textarea.scrollHeight + 16 + 20 + 4;
+    setUndoStack((prev) => [
+      ...prev,
+      {
+        action: Action.EDIT,
+        element: ObjectType.NOTE,
+        nid: data.id,
+        undo: editField,
+        redo: { content: e.target.value, height: newHeight },
+        message: t("edit_note", {
+          noteTitle: e.target.value,
+          extra: "[content]",
+        }),
+      },
+    ]);
+    setRedoStack([]);
+  };
+
+  const lockUnlockNote = (e: React.MouseEvent) => {
+    const locking = !data.locked;
+    updateNote(data.id, { locked: locking });
+
+    const lockNote = () => {
+      setSelectedElement({
+        ...selectedElement,
+        element: ObjectType.NONE,
+        id: -1,
+        open: false,
+      });
+      setBulkSelectedElements((prev) =>
+        prev.filter((el) => el.id !== data.id || el.type !== ObjectType.NOTE),
+      );
+    };
+
+    const unlockNote = () => {
+      const elementInBulk = {
+        id: data.id,
+        type: ObjectType.NOTE,
+        initialCoords: { x: data.x, y: data.y },
+        currentCoords: { x: data.x, y: data.y },
+      };
+      if (e.ctrlKey || e.metaKey) {
+        setBulkSelectedElements((prev) => [...prev, elementInBulk]);
+      } else {
+        setBulkSelectedElements([elementInBulk]);
+      }
+      setSelectedElement((prev) => ({
+        ...prev,
+        element: ObjectType.NOTE,
+        id: data.id,
+        open: false,
+      }));
+    };
+
+    if (locking) {
+      lockNote();
+    } else {
+      unlockNote();
+    }
+  };
+
+  const edit = () => {
+    setSelectedElement((prev) => ({
+      ...prev,
+      ...(layout.sidebar && { currentTab: Tab.NOTES }),
+      ...(!layout.sidebar && { element: ObjectType.NOTE }),
+      id: data.id,
+      open: true,
+    }));
+
+    if (layout.sidebar && selectedElement.currentTab === Tab.NOTES) {
+      document
+        .getElementById(`scroll_note_${data.id}`)
+        ?.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  const isSelected = useMemo(() => {
+    return (
+      (selectedElement.id === data.id &&
+        selectedElement.element === ObjectType.NOTE) ||
+      bulkSelectedElements.some(
+        (e) => e.type === ObjectType.NOTE && e.id === data.id,
+      )
+    );
+  }, [selectedElement, data, bulkSelectedElements]);
+
+  const width = data.width ?? NOTE_CONFIG.WIDTH;
+  const MIN_NOTE_WIDTH = 120;
+
+  useEffect(() => {
+    const textarea = document.getElementById(`note_${data.id}`);
+    if (!textarea) return;
+
+    textarea.style.height = "0";
+    const scrollHeight = textarea.scrollHeight;
+    textarea.style.height = scrollHeight + "px";
+    const newHeight = scrollHeight + 42;
+
+    if (newHeight === data.height) return;
+
+    updateNote(data.id, { height: newHeight });
+  }, [data.id, data.height, updateNote]);
+
+  const { mainSegments, foldSegments } = useMemo(
+    () => getNoteGeometry(data.x, data.y, width, data.height),
+    [data.x, data.y, width, data.height]
+  );
+
+  return (
+    <g
+      onPointerEnter={(e) => e.isPrimary && setHovered(true)}
+      onPointerLeave={(e) => e.isPrimary && setHovered(false)}
+      onPointerDown={(e) => {
+        // Required for onPointerLeave to trigger when a touch pointer leaves
+        // https://stackoverflow.com/a/70976017/1137077
+        (e.target as HTMLElement).releasePointerCapture(e.pointerId);
+      }}
+      onDoubleClick={edit}
+    >
+      <path
+        d={PathCommander.pathToString(mainSegments)}
+        fill={data.color}
+        stroke={
+          hovered
+            ? "rgb(59 130 246)"
+            : isSelected
+              ? "rgb(59 130 246)"
+              : "rgb(168 162 158)"
+        }
+        strokeDasharray={hovered ? "5" : "0"}
+        strokeLinejoin="round"
+        strokeWidth="2"
+      />
+      <path
+        d={PathCommander.pathToString(foldSegments)}
+        fill={data.color}
+        stroke={
+          hovered
+            ? "rgb(59 130 246)"
+            : isSelected
+              ? "rgb(59 130 246)"
+              : "rgb(168 162 158)"
+        }
+        strokeDasharray={hovered ? "5" : "0"}
+        strokeLinejoin="round"
+        strokeWidth="2"
+      />
+
+      {!layout.readOnly && !data.locked && hovered && (
+        <g style={{ pointerEvents: "none" }}>
+          <circle
+            cx={data.x}
+            cy={data.y + (data.height || 0) / 2}
+            r={6}
+            fill={settings.mode === "light" ? "white" : "rgb(28, 31, 35)"}
+            stroke="#5891db"
+            strokeWidth={2}
+            opacity={1}
+          />
+          <circle
+            cx={data.x + width}
+            cy={data.y + (data.height || 0) / 2}
+            r={6}
+            fill={settings.mode === "light" ? "white" : "rgb(28, 31, 35)"}
+            stroke="#5891db"
+            strokeWidth={2}
+            opacity={1}
+          />
+        </g>
+      )}
+      {!layout.readOnly && !data.locked && (
+        <rect
+          x={data.x - 4}
+          y={data.y + 8}
+          width={8}
+          height={Math.max(0, (data.height || 0) - 16)}
+          fill="transparent"
+          stroke="transparent"
+          style={{ cursor: "ew-resize" }}
+          onPointerDown={(e) => {
+            e.stopPropagation();
+            initialWidthRef.current = data.width ?? NOTE_CONFIG.WIDTH;
+            initialXRef.current = data.x;
+            setResizing(true);
+            (e.currentTarget as Element).setPointerCapture(e.pointerId);
+          }}
+          onPointerMove={(e) => {
+            if (!resizing) return;
+            const delta = e.movementX / (transform?.zoom || 1);
+            const currentWidth = data.width ?? NOTE_CONFIG.WIDTH;
+            let proposedWidth = currentWidth - delta;
+            let proposedX = data.x + delta;
+            if (proposedWidth < MIN_NOTE_WIDTH) {
+              const clampDelta = currentWidth - MIN_NOTE_WIDTH;
+              proposedWidth = MIN_NOTE_WIDTH;
+              proposedX = data.x + clampDelta;
+            }
+            if (proposedWidth !== data.width || proposedX !== data.x) {
+              updateNote(data.id, { width: proposedWidth, x: proposedX });
+            }
+          }}
+          onPointerUp={(e) => {
+            if (!resizing) return;
+            setResizing(false);
+            e.stopPropagation();
+            const finalWidth = data.width ?? NOTE_CONFIG.WIDTH;
+            const finalX = data.x;
+            const startWidth = initialWidthRef.current;
+            const startX = initialXRef.current;
+            if (finalWidth !== startWidth || finalX !== startX) {
+              setUndoStack((prev) => [
+                ...prev,
+                {
+                  action: Action.EDIT,
+                  element: ObjectType.NOTE,
+                  nid: data.id,
+                  undo: { width: startWidth, x: startX },
+                  redo: { width: finalWidth, x: finalX },
+                  message: t("edit_note", {
+                    noteTitle: data.title,
+                    extra: "[width/x]",
+                  }),
+                },
+              ]);
+              setRedoStack([]);
+            }
+          }}
+        />
+      )}
+
+      {!layout.readOnly && !data.locked && (
+        <rect
+          x={data.x + width - 4}
+          y={data.y + 8}
+          width={8}
+          height={Math.max(0, (data.height || 0) - 16)}
+          fill="transparent"
+          stroke="transparent"
+          style={{ cursor: "ew-resize" }}
+          onPointerDown={(e) => {
+            e.stopPropagation();
+            initialWidthRef.current = data.width ?? NOTE_CONFIG.WIDTH;
+            setResizing(true);
+            (e.currentTarget as Element).setPointerCapture(e.pointerId);
+          }}
+          onPointerMove={(e) => {
+            if (!resizing) return;
+            const delta = e.movementX / (transform?.zoom || 1);
+            const next = Math.max(
+              MIN_NOTE_WIDTH,
+              (data.width ?? NOTE_CONFIG.WIDTH) + delta,
+            );
+            if (next !== data.width) {
+              updateNote(data.id, { width: next });
+            }
+          }}
+          onPointerUp={(e) => {
+            if (!resizing) return;
+            setResizing(false);
+            e.stopPropagation();
+            const finalWidth = data.width ?? NOTE_CONFIG.WIDTH;
+            const startWidth = initialWidthRef.current;
+            if (finalWidth !== startWidth) {
+              setUndoStack((prev) => [
+                ...prev,
+                {
+                  action: Action.EDIT,
+                  element: ObjectType.NOTE,
+                  nid: data.id,
+                  undo: { width: startWidth },
+                  redo: { width: finalWidth },
+                  message: t("edit_note", {
+                    noteTitle: data.title,
+                    extra: "[width]",
+                  }),
+                },
+              ]);
+              setRedoStack([]);
+            }
+          }}
+        />
+      )}
+      <foreignObject
+        x={data.x}
+        y={data.y}
+        width={width}
+        height={data.height}
+        onPointerDown={onPointerDown}
+      >
+        <div className="text-gray-900 select-none w-full h-full cursor-move px-3 py-2">
+          <div className="flex justify-between gap-1 w-full">
+            <label
+              htmlFor={`note_${data.id}`}
+              className="ms-5 overflow-hidden text-ellipsis"
+            >
+              {data.title}
+            </label>
+            {(hovered ||
+              (selectedElement.element === ObjectType.NOTE &&
+                selectedElement.id === data.id &&
+                selectedElement.open &&
+                !layout.sidebar)) && (
+              <div className="flex items-center gap-1.5">
+                <Button
+                  icon={data.locked ? <IconLock /> : <IconUnlock />}
+                  size="small"
+                  theme="solid"
+                  style={{
+                    backgroundColor: "#2F68ADB3",
+                  }}
+                  onClick={lockUnlockNote}
+                  disabled={layout.readOnly}
+                />
+                <Popover
+                  visible={
+                    selectedElement.element === ObjectType.NOTE &&
+                    selectedElement.id === data.id &&
+                    selectedElement.open &&
+                    !layout.sidebar
+                  }
+                  onClickOutSide={() => {
+                    if (selectedElement.editFromToolbar) {
+                      setSelectedElement((prev) => ({
+                        ...prev,
+                        editFromToolbar: false,
+                      }));
+                      return;
+                    }
+                    setSelectedElement((prev) => ({
+                      ...prev,
+                      open: false,
+                    }));
+                    setSaveState(State.SAVING);
+                  }}
+                  stopPropagation
+                  content={
+                    <div className="popover-theme">
+                      <div className="font-semibold mb-2 ms-1">{t("edit")}</div>
+                      <div className="w-[280px] flex items-center mb-2">
+                        <Input
+                          value={data.title}
+                          placeholder={t("title")}
+                          className="me-2"
+                          readOnly={layout.readOnly}
+                          onChange={(value) =>
+                            updateNote(data.id, { title: value })
+                          }
+                          onFocus={(e) =>
+                            setEditField({ title: e.target.value })
+                          }
+                          onBlur={(e) => {
+                            if (e.target.value === editField.title) return;
+                            setUndoStack((prev) => [
+                              ...prev,
+                              {
+                                action: Action.EDIT,
+                                element: ObjectType.NOTE,
+                                nid: data.id,
+                                undo: editField,
+                                redo: { title: e.target.value },
+                                message: t("edit_note", {
+                                  noteTitle: e.target.value,
+                                  extra: "[title]",
+                                }),
+                              },
+                            ]);
+                            setRedoStack([]);
+                          }}
+                        />
+                        <ColorPicker
+                          usePopover={true}
+                          readOnly={layout.readOnly}
+                          value={data.color || "#fcf7ac"}
+                          onChange={(color) => updateNote(data.id, { color: color || "#fcf7ac" })}
+                          onColorPick={(color) => handleColorPick(color || "#fcf7ac")}
+                        />
+                      </div>
+                      <ColorList
+                        currentColor={data.color}
+                        onColorClick={(color) => {
+                          handleColorPick(color);
+                          updateNote(data.id, { color: color });
+                        }}
+                      />
+                      <div className="flex">
+                        <Button
+                          block
+                          type="danger"
+                          disabled={layout.readOnly}
+                          icon={<IconDeleteStroked />}
+                          onClick={() => deleteNote(data.id, true)}
+                        >
+                          {t("delete")}
+                        </Button>
+                      </div>
+                    </div>
+                  }
+                  trigger="custom"
+                  position="rightTop"
+                  showArrow
+                >
+                  <Button
+                    icon={<IconEdit />}
+                    size="small"
+                    theme="solid"
+                    style={{
+                      backgroundColor: "#2F68ADB3",
+                    }}
+                    onClick={edit}
+                  />
+                </Popover>
+              </div>
+            )}
+          </div>
+          <textarea
+            id={`note_${data.id}`}
+            readOnly={layout.readOnly}
+            value={data.content}
+            onChange={handleChange}
+            onFocus={(e) =>
+              setEditField({
+                content: e.target.value,
+                height: data.height,
+              })
+            }
+            onBlur={handleBlur}
+            className="w-full resize-none outline-hidden overflow-y-hidden border-none select-none"
+            style={{ backgroundColor: data.color }}
+          />
+        </div>
+      </foreignObject>
+    </g>
+  );
+}
+
+export default React.memo(Note);
