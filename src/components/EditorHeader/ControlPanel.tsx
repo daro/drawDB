@@ -810,19 +810,30 @@ export default function ControlPanel({
     });
   };
   const copyAsImage = () => {
-    toPng(document.getElementById("canvas"), {
+    const node = document.getElementById("canvas");
+    if (!node) {
+      Toast.error(t("oops_smth_went_wrong"));
+      return;
+    }
+    const filter = (n) => (n?.tagName || "").toUpperCase() !== "I";
+    toPng(node, {
       pixelRatio: EXPORT_CONFIG.PNG_PIXEL_RATIO,
-    }).then(function (dataUrl) {
-      const blob = dataURItoBlob(dataUrl);
-      navigator.clipboard
-        .write([new ClipboardItem({ "image/png": blob })])
-        .then(() => {
-          Toast.success(t("copied_to_clipboard"));
-        })
-        .catch(() => {
-          Toast.error(t("oops_smth_went_wrong"));
-        });
-    });
+      filter,
+    })
+      .then(function (dataUrl) {
+        const blob = dataURItoBlob(dataUrl);
+        navigator.clipboard
+          .write([new ClipboardItem({ "image/png": blob })])
+          .then(() => {
+            Toast.success(t("copied_to_clipboard"));
+          })
+          .catch(() => {
+            Toast.error(t("oops_smth_went_wrong"));
+          });
+      })
+      .catch(() => {
+        Toast.error(t("oops_smth_went_wrong"));
+      });
   };
   const resetView = () =>
     setTransform((prev) => ({ ...prev, zoom: 1, pan: { x: 0, y: 0 } }));
@@ -1575,15 +1586,59 @@ export default function ControlPanel({
           {
             name: "PNG",
             function: () => {
-              toPng(document.getElementById("canvas"), {
+              const node = document.getElementById("canvas");
+              if (!node) {
+                Toast.error(t("oops_smth_went_wrong"));
+                return;
+              }
+              const filter = (n) => (n?.tagName || "").toUpperCase() !== "I";
+              toPng(node, {
                 pixelRatio: EXPORT_CONFIG.PNG_PIXEL_RATIO,
-              }).then(function (dataUrl) {
-                setExportData((prev) => ({
-                  ...prev,
-                  data: dataUrl,
-                  extension: "png",
-                }));
-              });
+                filter,
+              })
+                .then(function (dataUrl) {
+                  setExportData((prev) => ({
+                    ...prev,
+                    data: dataUrl,
+                    extension: "png",
+                  }));
+                })
+                .catch(() => {
+                  Toast.error(t("oops_smth_went_wrong"));
+                });
+              setModal(MODAL.IMG);
+            },
+          },
+          {
+            name: "PNG (transparent)",
+            function: () => {
+              const node = document.getElementById("canvas");
+              if (!node) {
+                Toast.error(t("oops_smth_went_wrong"));
+                return;
+              }
+              const wrapper = document.querySelector("#canvas > div") as HTMLElement | null;
+              const prevBg = wrapper ? wrapper.style.backgroundColor : null;
+              if (wrapper) wrapper.style.backgroundColor = "transparent";
+              const filter = (n) => (n?.tagName || "").toUpperCase() !== "I";
+              toPng(node, {
+                pixelRatio: EXPORT_CONFIG.PNG_PIXEL_RATIO,
+                backgroundColor: "rgba(0,0,0,0)",
+                filter,
+              })
+                .then(function (dataUrl) {
+                  setExportData((prev) => ({
+                    ...prev,
+                    data: dataUrl,
+                    extension: "png",
+                  }));
+                })
+                .catch(() => {
+                  Toast.error(t("oops_smth_went_wrong"));
+                })
+                .finally(() => {
+                  if (wrapper && prevBg !== null) wrapper.style.backgroundColor = prevBg;
+                });
               setModal(MODAL.IMG);
             },
           },

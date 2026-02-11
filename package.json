@@ -11,10 +11,10 @@
   },
   "homepage": "https://github.com/daro/drawDB",
   "scripts": {
-    "dev": "vite",
+    "dev": "NODE_OPTIONS=--max-old-space-size=4096 vite",
     "docker:dev": "docker compose up",
     "docker:install": "docker exec -it drawdb-dev npm install",
-    "build": "vite build",
+    "build": "NODE_OPTIONS=--max-old-space-size=4096 vite build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "test": "vite-node src/utils/path/geometry.test.ts"

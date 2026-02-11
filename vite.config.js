@@ -23,14 +23,21 @@ export default defineConfig({
   ],
 
   build: {
-    sourcemap: true,
-    // Increase warning limit to 1MB
-    chunkSizeWarningLimit: 1000,
+    sourcemap: false,
+    // Increase warning limit to 2MB
+    chunkSizeWarningLimit: 2000,
 
     rollupOptions: {
       output: {
         manualChunks(id) {
           if (id.includes("node_modules")) {
+            // Semi UI - large UI framework
+            if (
+              id.includes("@douyinfe/semi-ui") ||
+              id.includes("@douyinfe/semi-icons")
+            ) {
+              return "ui-framework";
+            }
             // Monaco Editor - large library
             if (id.includes("@monaco-editor") || id.includes("monaco-editor")) {
               return "monaco-editor";
