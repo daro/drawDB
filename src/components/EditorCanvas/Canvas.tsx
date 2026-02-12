@@ -184,7 +184,8 @@ export default function Canvas() {
     if (!e.isPrimary) return;
     if (e.defaultPrevented) return;
 
-    if (selectedElement.element === ObjectType.TABLE && selectedElement.open && !layout.sidebar) return;
+    const isElementClick = elementPointerDown.current !== null;
+    if (selectedElement.element === ObjectType.TABLE && selectedElement.open && !layout.sidebar && isElementClick) return;
 
     const isMouseLeftButton = e.button === 0;
     const isMouseMiddleButton = e.button === 1;
@@ -218,7 +219,8 @@ export default function Canvas() {
    * @param e - Pointer up event.
    */
   const handlePointerUp = useCallback((e: React.PointerEvent) => {
-    if (selectedElement.open && !layout.sidebar) return;
+    const startedOnElement = elementPointerDown.current !== null;
+    if (selectedElement.open && !layout.sidebar && startedOnElement) return;
     if (!e.isPrimary) return;
 
     if (linking) {
@@ -232,10 +234,12 @@ export default function Canvas() {
 
     if (finalizeSelection()) {
       const isClick =
-        Math.abs(bulkSelectRect.x1 - pointer.spaces.diagram.x) < 2 &&
-        Math.abs(bulkSelectRect.y1 - pointer.spaces.diagram.y) < 2;
+        Math.abs(bulkSelectRect.x1 - pointer.spaces.diagram.x) < 5 &&
+        Math.abs(bulkSelectRect.y1 - pointer.spaces.diagram.y) < 5;
 
-      if (isClick && elementPointerDown.current === null) {
+      const isBackgroundClick = !startedOnElement;
+
+      if (isClick && isBackgroundClick) {
         setSelectedElement((prev) => ({
           ...prev,
           element: ObjectType.NONE,
@@ -243,6 +247,17 @@ export default function Canvas() {
           open: false,
         }));
         setBulkSelectedElements([]);
+        // Reset hovered and linking states when clicking on empty canvas
+        setHoveredTable({ tableId: null, fieldId: null } as any);
+        setLinking(false);
+        setLinkingLine({
+          startX: 0,
+          startY: 0,
+          endX: 0,
+          endY: 0,
+          startTableId: "",
+          startFieldId: "",
+        } as any);
       } else {
         collectSelectedElements();
       }
@@ -250,6 +265,7 @@ export default function Canvas() {
 
     stopPanning();
     setAreaResize({ id: "", dir: "none" });
+    elementPointerDown.current = null; // ensure cleared after click/drag cycle
     setAreaInitDimensions({
       x: 0,
       y: 0,
@@ -282,6 +298,14 @@ export default function Canvas() {
           className="absolute w-full h-full touch-none"
           viewBox={`${viewBox.left} ${viewBox.top} ${viewBox.width} ${viewBox.height}`}
         >
+          <rect
+            x={viewBox.left}
+            y={viewBox.top}
+            width={viewBox.width}
+            height={viewBox.height}
+            fill="transparent"
+            pointerEvents="all"
+          />
           <GridBackground show={settings.showGrid} viewBox={viewBox} />
           <RelationshipsLayer
             relationships={relationships}

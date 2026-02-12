@@ -166,9 +166,13 @@ export function useWaypointInteraction(
     });
 
     if (changed) {
-      updateRelationship(data.id, {
-        waypoints: newWaypoints,
-      });
+      // Use a timeout to push the state update out of the render cycle
+      const timer = setTimeout(() => {
+        updateRelationship(data.id, {
+          waypoints: newWaypoints,
+        });
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [
     data.id,

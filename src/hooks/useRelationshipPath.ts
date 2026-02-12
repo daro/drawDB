@@ -90,9 +90,14 @@ export function useRelationshipPath(
   // Update path length when the geometry changes
   useLayoutEffect(() => {
     try {
-      setPathLength(commander.getTotalLength());
+      const length = commander.getTotalLength();
+      if (length !== pathLength) {
+        setPathLength(length);
+      }
     } catch {
-      setPathLength(0);
+      if (pathLength !== 0) {
+        setPathLength(0);
+      }
     }
   }, [commander]);
 

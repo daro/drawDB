@@ -33,6 +33,10 @@ import { getTableHeight } from "../utils/utils";
 import { tableWidth } from "../data/constants";
 import { IIdContext } from "../types";
 
+import { useWorkspacePersistence } from "../hooks/useWorkspacePersistence";
+import { useWorkspaceGist } from "../hooks/useWorkspaceGist";
+import { useWorkspaceState } from "../hooks/useWorkspaceState";
+
 export const IdContext = createContext<IIdContext>({
   gistId: "",
   setGistId: () => {},
@@ -43,17 +47,24 @@ export const IdContext = createContext<IIdContext>({
 const SIDEPANEL_MIN_WIDTH = 384;
 
 export default function WorkSpace() {
-  const [id, setId] = useState<string | number>(0);
-  const [gistId, setGistId] = useState("");
-  const [version, setVersion] = useState("");
-  const [loadedFromGistId, setLoadedFromGistId] = useState("");
-  const [title, setTitle] = useState("Untitled Diagram");
-  const [resize, setResize] = useState(false);
-  const [width, setWidth] = useState(SIDEPANEL_MIN_WIDTH);
-  const [lastSaved, setLastSaved] = useState("");
-  const [showSelectDbModal, setShowSelectDbModal] = useState(false);
-  const [showRestoreModal, setShowRestoreModal] = useState(false);
-  const [selectedDb, setSelectedDb] = useState("");
+  const { t, i18n } = useTranslation();
+  let [searchParams, setSearchParams] = useSearchParams();
+
+  const {
+    id, setId,
+    gistId, setGistId,
+    version, setVersion,
+    loadedFromGistId, setLoadedFromGistId,
+    title, setTitle,
+    resize, setResize,
+    width, setWidth,
+    lastSaved, setLastSaved,
+    showSelectDbModal, setShowSelectDbModal,
+    showRestoreModal, setShowRestoreModal,
+    selectedDb, setSelectedDb,
+    handleResize,
+  } = useWorkspaceState("Untitled Diagram");
+
   const { layout, setLayout } = useLayout();
   const { settings } = useSettings();
   const { types, setTypes } = useTypes();
@@ -77,121 +88,56 @@ export default function WorkSpace() {
     setDatabase,
   } = useDiagram();
   const { undoStack, redoStack, setUndoStack, setRedoStack } = useUndoRedo();
-  const { t, i18n } = useTranslation();
-  let [searchParams, setSearchParams] = useSearchParams();
-  const handleResize = (e) => {
-    if (!resize) return;
-    const w = isRtl(i18n.language) ? window.innerWidth - e.clientX : e.clientX;
-    if (w > SIDEPANEL_MIN_WIDTH) setWidth(w);
-  };
 
-  const save = useCallback(async () => {
-    const name = window.name.split(" ");
-    const op = name[0];
-    const saveAsDiagram = window.name === "" || op === "d" || op === "lt";
-
-    if (saveAsDiagram) {
-      if (searchParams.has("shareId")) {
-        searchParams.delete("shareId");
-        setSearchParams(searchParams, { replace: true });
-      }
-      if ((id === 0 && window.name === "") || op === "lt") {
-        await db.diagrams
-          .add({
-            database: database,
-            name: title,
-            gistId: gistId ?? "",
-            lastModified: new Date(),
-            tables: tables,
-            references: relationships,
-            xorGroups: xorGroups,
-            orGroups: orGroups,
-            notes: notes,
-            texts: texts,
-            areas: areas,
-            todos: tasks,
-            pan: transform.pan,
-            zoom: transform.zoom,
-            loadedFromGistId: loadedFromGistId,
-            ...(databases[database].hasEnums && { enums: enums }),
-            ...(databases[database].hasTypes && { types: types }),
-          })
-          .then((id: number) => {
-            setId(id);
-            window.name = `d ${id}`;
-            setSaveState(State.SAVED);
-            setLastSaved(new Date().toLocaleString());
-          });
-      } else {
-        await db.diagrams
-          .update(typeof id === 'number' ? id : parseInt(String(id)), {
-            database: database,
-            name: title,
-            lastModified: new Date(),
-            tables: tables,
-            references: relationships,
-            xorGroups: xorGroups,
-            orGroups: orGroups,
-            notes: notes,
-            texts: texts,
-            areas: areas,
-            todos: tasks,
-            gistId: gistId ?? "",
-            pan: transform.pan,
-            zoom: transform.zoom,
-            loadedFromGistId: loadedFromGistId,
-            ...(databases[database].hasEnums && { enums: enums }),
-            ...(databases[database].hasTypes && { types: types }),
-          })
-          .then(() => {
-            setSaveState(State.SAVED);
-            setLastSaved(new Date().toLocaleString());
-          });
-      }
-    } else {
-      await db.templates
-        .update(typeof id === 'number' ? id : parseInt(String(id)), {
-          database: database,
-          title: title,
-          tables: tables,
-          relationships: relationships,
-          notes: notes,
-          texts: texts,
-          subjectAreas: areas,
-          todos: tasks,
-          pan: transform.pan,
-          zoom: transform.zoom,
-          ...(databases[database].hasEnums && { enums: enums }),
-          ...(databases[database].hasTypes && { types: types }),
-        })
-        .then(() => {
-          setSaveState(State.SAVED);
-          setLastSaved(new Date().toLocaleString());
-        })
-        .catch(() => {
-          setSaveState(State.ERROR);
-        });
-    }
-  }, [
+  const { save, loadLatestDiagram, loadDiagram } = useWorkspacePersistence({
+    id, setId,
+    title, setTitle,
+    database, setDatabase,
+    tables, setTables,
+    relationships, setRelationships,
+    xorGroups, setXorGroups,
+    orGroups, setOrGroups,
+    notes, setNotes,
+    texts, setTexts,
+    areas, setAreas,
+    tasks, setTasks,
+    transform, setTransform,
+    enums, setEnums,
+    types, setTypes,
+    gistId, setGistId,
+    loadedFromGistId, setLoadedFromGistId,
+    setSaveState,
+    setLastSaved,
+    setUndoStack,
+    setRedoStack,
     searchParams,
     setSearchParams,
-    tables,
-    relationships,
-    xorGroups,
-    orGroups,
-    notes,
-    areas,
-    types,
-    title,
-    id,
-    tasks,
-    transform,
-    setSaveState,
+    setSelectedDb,
+    setShowSelectDbModal,
+  });
+
+  const { loadGist } = useWorkspaceGist({
+    setDatabase,
+    setId,
+    setGistId,
+    setLoadedFromGistId,
+    setTitle,
+    setTables,
+    setRelationships,
+    setXorGroups,
+    setOrGroups,
+    setAreas,
+    setNotes,
+    setTexts,
+    setTasks,
+    setTransform,
+    setUndoStack,
+    setRedoStack,
+    setTypes,
+    setEnums,
     database,
-    enums,
-    gistId,
-    loadedFromGistId,
-  ]);
+    t,
+  });
 
   const load = useCallback(async () => {
     const loadLatestDiagram = async () => {

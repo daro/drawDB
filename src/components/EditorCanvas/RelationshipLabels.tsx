@@ -52,7 +52,10 @@ function RelationshipLabels({
 
   useLayoutEffect(() => {
     if (labelRef.current) {
-      setBbox(labelRef.current.getBBox());
+      const newBbox = labelRef.current.getBBox();
+      if (!bbox || newBbox.x !== bbox.x || newBbox.y !== bbox.y || newBbox.width !== bbox.width || newBbox.height !== bbox.height) {
+        setBbox(newBbox);
+      }
     }
   }, [name, relationshipNameFontSize, nameRotation]);
 

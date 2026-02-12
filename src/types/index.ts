@@ -124,6 +124,23 @@ export interface ITypeField {
   values?: string[];
 }
 
+export interface IDataType {
+  type: string;
+  color: string;
+  checkDefault: (field: IField) => boolean;
+  hasCheck?: boolean;
+  isSized?: boolean;
+  hasPrecision?: boolean;
+  canIncrement?: boolean;
+  hasQuotes?: boolean;
+  noDefault?: boolean;
+  defaultSize?: number;
+}
+
+export interface IDataTypes {
+  [key: string]: IDataType;
+}
+
 export interface IType {
   id: string | number;
   name: string;
@@ -171,12 +188,29 @@ export interface TextProps {
   onPointerDown: (e: React.PointerEvent) => void;
 }
 
+export interface ILinkingLine {
+  startX: number;
+  startY: number;
+  endX: number;
+  endY: number;
+  startTableId: string | number;
+  startFieldId: string | number;
+}
+
+export interface IHoveredTable {
+  tableId: string | number | null;
+  fieldId: string | number | null;
+}
+
 export interface IGroup {
   id: string | number;
   label: string;
   parentTableId: string | number;
   childRelationshipIds: (string | number)[];
 }
+
+import { Dispatch, SetStateAction } from "react";
+import { ITable, IRelationship, IField, IGroup, ILinkingLine, IHoveredTable } from "./index";
 
 export interface IDiagram {
   tables: ITable[];
@@ -375,6 +409,46 @@ export interface TextInfoProps {
 
 export interface RelationshipInfoProps {
   data: IRelationship;
+}
+
+
+export interface DiagramContextType {
+  tables: ITable[];
+  setTables: Dispatch<SetStateAction<ITable[]>>;
+  addTable: (data?: { table: ITable; index: number }, addToHistory?: boolean) => void;
+  updateTable: (id: string | number, updatedValues: Partial<ITable>, addToHistory?: boolean) => void;
+  updateField: (tid: string | number, fid: string | number, updatedValues: Partial<IField>) => void;
+  deleteField: (field: IField, tid: string | number, addToHistory?: boolean) => void;
+  deleteTable: (id: string | number, addToHistory?: boolean) => void;
+  relationships: IRelationship[];
+  setRelationships: Dispatch<SetStateAction<IRelationship[]>>;
+  addRelationship: (data: IRelationship | { relationship: IRelationship; index: number }, addToHistory?: boolean) => void;
+  deleteRelationship: (id: string | number, addToHistory?: boolean) => void;
+  updateRelationship: (id: string | number, updatedValues: Partial<IRelationship>) => void;
+  xorGroups: IGroup[];
+  setXorGroups: Dispatch<SetStateAction<IGroup[]>>;
+  addXorGroup: (data: Partial<IGroup>, addToHistory?: boolean) => void;
+  deleteXorGroup: (id: string | number, addToHistory?: boolean) => void;
+  updateXorGroup: (id: string | number, updatedValues: Partial<IGroup>) => void;
+  orGroups: IGroup[];
+  setOrGroups: Dispatch<SetStateAction<IGroup[]>>;
+  addOrGroup: (data: Partial<IGroup>, addToHistory?: boolean) => void;
+  deleteOrGroup: (id: string | number, addToHistory?: boolean) => void;
+  updateOrGroup: (id: string | number, updatedValues: Partial<IGroup>) => void;
+  convertXorToOr: (id: string | number) => void;
+  convertOrToXor: (id: string | number) => void;
+  database: string;
+  setDatabase: Dispatch<SetStateAction<string>>;
+  tablesCount: number;
+  relationshipsCount: number;
+  linking: boolean;
+  setLinking: Dispatch<SetStateAction<boolean>>;
+  linkingLine: ILinkingLine;
+  setLinkingLine: Dispatch<SetStateAction<ILinkingLine>>;
+  hoveredTable: IHoveredTable;
+  setHoveredTable: Dispatch<SetStateAction<IHoveredTable>>;
+  relationshipType: string;
+  setRelationshipType: Dispatch<SetStateAction<string>>;
 }
 
 export interface GroupInfoProps {

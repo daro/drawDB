@@ -166,7 +166,7 @@ export function useBulkSelection(
       }));
       return true;
     }
-    return false;
+    return true;
   }, [bulkSelectRect.show, pointer.spaces.diagram]);
 
   return {
