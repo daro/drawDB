@@ -1,19 +1,16 @@
 # Etap 1: Budowanie aplikacji
 FROM node:20-alpine AS build
 
-# Instalacja pnpm
-RUN npm install -g pnpm
-
 WORKDIR /app
 
 # Kopiowanie plików zależności
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+COPY package.json ./
+RUN npm install
 
 # Kopiowanie reszty kodu i budowanie wersji produkcyjnej
 COPY . .
 ENV NODE_OPTIONS=""
-RUN pnpm build
+RUN npm run build
 
 # Etap 2: Serwer Nginx do serwowania plików
 FROM nginx:stable-alpine AS production
