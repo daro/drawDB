@@ -8,8 +8,8 @@ import {
   useLayout,
   useUndoRedo,
   useSettings,
-} from "../../../hooks";
-import { Action, ObjectType, State } from "../../../data/constants";
+} from "@hooks";
+import { Action, ObjectType, State } from "@data/constants";
 import { useTranslation } from "react-i18next";
 import { DragHandle } from "../../SortableList/DragHandle";
 import { SortableList } from "../../SortableList/SortableList";

@@ -64,7 +64,7 @@ export class PathCommander extends SVGPathCommander {
           // If the cross product is very small, segments are practically collinear
           // We use a normalized threshold for better stability across different scales
           const sinTheta = Math.abs(crossProduct) / (len1 * len2);
-          if (sinTheta < 1e-4) {
+          if (sinTheta < 1e-2) {
             result.push(curr as PathSegment);
             continue;
           }

@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { useUndoRedo } from "../../../hooks";
+import { useUndoRedo } from "@hooks";
 import { List } from "@douyinfe/semi-ui";
 
 export default function Timeline() {

@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "qdrant": {
+      "type": "command",
+      "command": "ssh",
+      "args": [
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ServerAliveInterval=30",
+        "root@IP_TWOJEGO_LXC",
+        "QDRANT_URL=http://192.168.19.10:6333 QDRANT_COLLECTION=junie_memory /opt/mcp-venv/bin/mcp-server-qdrant"
+      ],
+      "enabled": true
+    }
+  }
+}

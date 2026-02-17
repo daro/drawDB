@@ -28,9 +28,11 @@ export const addToDebugConsole = (line: number, prefix: string, value: any) => {
   debugLogs.sort((a, b) => a.line - b.line);
 
   if (typeof window !== 'undefined') {
-    window.dispatchEvent(
-      new CustomEvent("debug-console-update", { detail: [...debugLogs] }),
-    );
+    setTimeout(() => {
+      window.dispatchEvent(
+        new CustomEvent("debug-console-update", { detail: [...debugLogs] }),
+      );
+    }, 0);
   }
 };
 

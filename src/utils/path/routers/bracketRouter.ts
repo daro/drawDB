@@ -1,8 +1,8 @@
 import { PathArray } from "svg-path-commander";
 import { PathCommander } from "../PathCommander";
-import { IPoint } from "../../../types";
+import { IPoint } from "@types";
 import { PathRouter } from "./types";
-import { addToDebugConsole } from "../../../utils/debug";
+import { addToDebugConsole } from "@utils/debug";
 
 export const bracketRouter: PathRouter = ({
   r,

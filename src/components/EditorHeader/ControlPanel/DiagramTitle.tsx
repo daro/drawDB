@@ -1,7 +1,7 @@
 import { Tag } from "@douyinfe/semi-ui";
 import { IconEdit } from "@douyinfe/semi-icons";
-import { databases } from "../../../data/databases";
-import { MODAL } from "../../../data/constants";
+import { databases } from "@data/databases";
+import { MODAL } from "@data/constants";
 
 interface DiagramTitleProps {
   database: string;

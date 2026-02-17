@@ -1,5 +1,5 @@
-import { TABLE_CONFIG } from "../../data/constants";
-import { ITable, IRelationship, IGroup } from "../../types";
+import { TABLE_CONFIG } from "@data/constants";
+import { ITable, IRelationship, IGroup } from "@types";
 
 export const getGroupPoints = (data: IGroup, tables: ITable[], relationships: IRelationship[]) => {
   const parentTable = tables.find((t) => t.id === data.parentTableId);

@@ -1,5 +1,5 @@
 import { TYPE_COLORS } from "../constants";
-import { IDataTypes } from "../../types";
+import { IDataTypes } from "@types";
 import { checkNoValidation } from "./helpers";
 import { mysqlTypes } from "./mysql";
 

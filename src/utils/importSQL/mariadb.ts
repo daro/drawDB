@@ -1,13 +1,13 @@
-// @ts-nocheck
 import { nanoid } from "nanoid";
-import { Cardinality, DB } from "../../data/constants";
-import { dbToTypes } from "../../data/datatypes";
+import { Cardinality, DB, DBType } from "@data/constants";
+import { dbToTypes } from "@data/datatypes";
 import { buildSQLFromAST } from "./shared";
+import { IImportData, ITable, IRelationship, IField } from "@types";
 
-const affinity = {
+const affinity: Record<string, Record<string, string>> = {
   [DB.MARIADB]: new Proxy(
     { INT: "INTEGER" },
-    { get: (target, prop) => (prop in target ? target[prop] : "BLOB") },
+    { get: (target, prop: string) => (prop in target ? target[prop] : "BLOB") },
   ),
   [DB.GENERIC]: new Proxy(
     {
@@ -17,29 +17,44 @@ const affinity = {
       BIT: "BOOLEAN",
       YEAR: "INTEGER",
     },
-    { get: (target, prop) => (prop in target ? target[prop] : "BLOB") },
+    { get: (target, prop: string) => (prop in target ? target[prop] : "BLOB") },
   ),
 };
 
-export function fromMariaDB(ast, diagramDb = DB.GENERIC) {
-  const tables = [];
-  const relationships = [];
+export function fromMariaDB(ast: any, diagramDb: DBType = DB.GENERIC): IImportData {
+  const tables: ITable[] = [];
+  const relationships: IRelationship[] = [];
 
-  const parseSingleStatement = (e) => {
+  const parseSingleStatement = (e: any) => {
     if (e.type === "create") {
       if (e.keyword === "table") {
-        const table = {};
-        table.name = e.table[0].table;
-        table.comment = "";
-        table.color = "#175e7a";
-        table.fields = [];
-        table.indices = [];
-        table.id = nanoid();
-        e.create_definitions.forEach((d) => {
+        const table: ITable = {
+          id: nanoid(),
+          name: e.table[0].table,
+          comment: "",
+          color: "#175e7a",
+          fields: [],
+          indices: [],
+          x: 0,
+          y: 0,
+          width: 0,
+          height: 0,
+          locked: false,
+        };
+        e.create_definitions.forEach((d: any) => {
           if (d.resource === "column") {
-            const field = {};
-            field.id = nanoid();
-            field.name = d.column.column;
+            const field: IField = {
+              id: nanoid(),
+              name: d.column.column,
+              type: "",
+              default: "",
+              check: "",
+              primary: false,
+              unique: false,
+              notNull: false,
+              increment: false,
+              comment: "",
+            };
 
             let type = d.definition.dataType;
             if (!dbToTypes[diagramDb][type]) {
@@ -48,18 +63,14 @@ export function fromMariaDB(ast, diagramDb = DB.GENERIC) {
             field.type = type;
 
             if (d.definition.expr && d.definition.expr.type === "expr_list") {
-              field.values = d.definition.expr.value.map((v) => v.value);
+              field.values = d.definition.expr.value.map((v: any) => v.value);
             }
             field.comment = d.comment ? d.comment.value.value : "";
-            field.unique = false;
-            if (d.unique) field.unique = true;
-            field.increment = false;
-            if (d.auto_increment) field.increment = true;
-            field.notNull = false;
-            if (d.nullable) field.notNull = true;
-            field.primary = false;
-            if (d.primary_key) field.primary = true;
-            field.default = "";
+            field.unique = !!d.unique;
+            field.increment = !!d.auto_increment;
+            field.notNull = !!d.nullable;
+            field.primary = !!d.primary_key;
+
             if (d.default_val) {
               let defaultValue = "";
               if (d.default_val.value.type === "function") {
@@ -68,7 +79,7 @@ export function fromMariaDB(ast, diagramDb = DB.GENERIC) {
                   defaultValue +=
                     "(" +
                     d.default_val.value.args.value
-                      .map((v) => {
+                      .map((v: any) => {
                         if (
                           v.type === "single_quote_string" ||
                           v.type === "double_quote_string"
@@ -93,7 +104,6 @@ export function fromMariaDB(ast, diagramDb = DB.GENERIC) {
                 field.size = d.definition["length"];
               }
             }
-            field.check = "";
             if (d.check) {
               field.check = buildSQLFromAST(d.check.definition[0], DB.MARIADB);
             }
@@ -101,7 +111,7 @@ export function fromMariaDB(ast, diagramDb = DB.GENERIC) {
             table.fields.push(field);
           } else if (d.resource === "constraint") {
             if (d.constraint_type === "primary key") {
-              d.definition.forEach((c) => {
+              d.definition.forEach((c: any) => {
                 table.fields.forEach((f) => {
                   if (f.name === c.column && !f.primary) {
                     f.primary = true;
@@ -109,8 +119,6 @@ export function fromMariaDB(ast, diagramDb = DB.GENERIC) {
                 });
               });
             } else if (d.constraint_type.toLowerCase() === "foreign key") {
-              const relationship = {};
-              const startTableId = table.id;
               const startTableName = e.table[0].table;
               const startFieldName = d.definition[0].column;
               const endTableName = d.reference_definition.table[0].table;
@@ -129,15 +137,9 @@ export function fromMariaDB(ast, diagramDb = DB.GENERIC) {
               );
               if (!startField) return;
 
-              relationship.name = `fk_${startTableName}_${startFieldName}_${endTableName}`;
-              relationship.startTableId = startTableId;
-              relationship.endTableId = endTable.id;
-              relationship.endFieldId = endField.id;
-              relationship.startFieldId = startField.id;
-              relationship.id = nanoid()
               let updateConstraint = "No action";
               let deleteConstraint = "No action";
-              d.reference_definition.on_action.forEach((c) => {
+              d.reference_definition.on_action.forEach((c: any) => {
                 if (c.type === "on update") {
                   updateConstraint = c.value.value;
                   updateConstraint =
@@ -151,21 +153,24 @@ export function fromMariaDB(ast, diagramDb = DB.GENERIC) {
                 }
               });
 
-              relationship.updateConstraint = updateConstraint;
-              relationship.deleteConstraint = deleteConstraint;
-
-              if (startField.unique) {
-                relationship.cardinality = Cardinality.ONE_TO_ONE;
-              } else {
-                relationship.cardinality = Cardinality.MANY_TO_ONE;
-              }
+              const relationship: IRelationship = {
+                id: nanoid(),
+                name: `fk_${startTableName}_${startFieldName}_${endTableName}`,
+                startTableId: table.id,
+                endTableId: endTable.id,
+                endFieldId: endField.id,
+                startFieldId: startField.id,
+                updateConstraint,
+                deleteConstraint,
+                cardinality: startField.unique ? Cardinality.ONE_TO_ONE : Cardinality.MANY_TO_ONE,
+              };
 
               relationships.push(relationship);
             }
           }
         });
 
-        e.table_options?.forEach((opt) => {
+        e.table_options?.forEach((opt: any) => {
           if (opt.keyword === "comment") {
             table.comment = opt.value.replace(/^["']|["']$/g, "");
           }
@@ -176,26 +181,25 @@ export function fromMariaDB(ast, diagramDb = DB.GENERIC) {
         const index = {
           name: e.index,
           unique: e.index_type === "unique",
-          fields: e.index_columns.map((f) => f.column),
+          fields: e.index_columns.map((f: any) => f.column),
         };
 
         const table = tables.find((t) => t.name === e.table.table);
 
         if (table) {
-          table.indices.push(index);
+          table.indices.push(index as any);
           table.indices.forEach((i, j) => {
             i.id = j;
           });
         }
       }
     } else if (e.type === "alter") {
-      e.expr.forEach((expr) => {
+      e.expr.forEach((expr: any) => {
         if (
           expr.action === "add" &&
           expr.create_definitions.constraint_type.toLowerCase() ===
             "foreign key"
         ) {
-          const relationship = {};
           const startTableName = e.table[0].table;
           const startFieldName = expr.create_definitions.definition[0].column;
           const endTableName =
@@ -205,7 +209,7 @@ export function fromMariaDB(ast, diagramDb = DB.GENERIC) {
           let updateConstraint = "No action";
           let deleteConstraint = "No action";
           expr.create_definitions.reference_definition.on_action.forEach(
-            (c) => {
+            (c: any) => {
               if (c.type === "on update") {
                 updateConstraint = c.value.value;
                 updateConstraint =
@@ -234,21 +238,17 @@ export function fromMariaDB(ast, diagramDb = DB.GENERIC) {
           );
           if (!startField) return;
 
-          relationship.name =
-            "fk_" + startTableName + "_" + startFieldName + "_" + endTableName;
-          relationship.startTableId = startTable.id;
-          relationship.startFieldId = startField.id;
-          relationship.endTableId = endTable.id;
-          relationship.endFieldId = endField.id;
-          relationship.updateConstraint = updateConstraint;
-          relationship.deleteConstraint = deleteConstraint;
-          relationship.id = nanoid();
-
-          if (startField.unique) {
-            relationship.cardinality = Cardinality.ONE_TO_ONE;
-          } else {
-            relationship.cardinality = Cardinality.MANY_TO_ONE;
-          }
+          const relationship: IRelationship = {
+            id: nanoid(),
+            name: `fk_${startTableName}_${startFieldName}_${endTableName}`,
+            startTableId: startTable.id,
+            startFieldId: startField.id,
+            endTableId: endTable.id,
+            endFieldId: endField.id,
+            updateConstraint,
+            deleteConstraint,
+            cardinality: startField.unique ? Cardinality.ONE_TO_ONE : Cardinality.MANY_TO_ONE,
+          };
 
           relationships.push(relationship);
         }
@@ -262,5 +262,12 @@ export function fromMariaDB(ast, diagramDb = DB.GENERIC) {
     parseSingleStatement(ast);
   }
 
-  return { tables, relationships };
+  return { 
+    tables, 
+    relationships,
+    xorGroups: [],
+    orGroups: [],
+    enums: [],
+    types: []
+  };
 }

@@ -1,9 +1,9 @@
-import { db } from "../../../data/db";
+import { db } from "@data/db";
 import { Banner } from "@douyinfe/semi-ui";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useTranslation } from "react-i18next";
-import { databases } from "../../../data/databases";
-import { OpenProps } from "../../../types";
+import { databases } from "@data/databases";
+import { OpenProps } from "@types";
 
 export default function Open({
   selectedDiagramId,

@@ -1,4 +1,4 @@
-import { dbToTypes } from "../../data/datatypes";
+import { dbToTypes } from "@data/datatypes";
 
 export function setUpDBML(monaco, database) {
   monaco.languages.register({ id: "dbml" });

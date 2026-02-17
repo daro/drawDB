@@ -1,10 +1,12 @@
 import { Tooltip } from "@douyinfe/semi-ui";
 import { 
   IconAddXorGroup, 
-  IconAddOrGroup 
-} from "../../../icons";
-import { IconRotationStroked, IconDeleteStroked } from "@douyinfe/semi-icons";
-import { ObjectType } from "../../../data/constants";
+  IconAddOrGroup,
+  IconWaypoint,
+  IconDivider,
+} from "@icons";
+import { IconDeleteStroked } from "@douyinfe/semi-icons";
+import { ObjectType } from "@data/constants";
 
 interface RelationshipToolbarProps {
   t: any;
@@ -17,14 +19,14 @@ interface RelationshipToolbarProps {
   bulkSelectedElements: any[];
   isSingleOrGroupSelected: boolean;
   convertOrToXor: (id: string | number) => void;
-  rotateRelationshipName: () => void;
-  hasSelectedRelationships: boolean;
   selectedElement: any;
   del: () => void;
   canCreateXorGroup: boolean;
   createXorGroup: () => void;
   canCreateOrGroup: boolean;
   createOrGroup: () => void;
+  waypointMode: string;
+  setWaypointMode: (val: string) => void;
 }
 
 export default function RelationshipToolbar({
@@ -38,17 +40,36 @@ export default function RelationshipToolbar({
   bulkSelectedElements,
   isSingleOrGroupSelected,
   convertOrToXor,
-  rotateRelationshipName,
-  hasSelectedRelationships,
   selectedElement,
   del,
   canCreateXorGroup,
   createXorGroup,
   canCreateOrGroup,
   createOrGroup,
+  waypointMode,
+  setWaypointMode,
 }: RelationshipToolbarProps) {
   return (
     <>
+      <Tooltip content={t("waypoint")} position="bottom">
+        <button
+          className={`py-1 px-2 hover-2 rounded-sm flex items-center disabled:opacity-50 ${waypointMode === "waypoint" ? "text-blue-500" : ""}`}
+          onClick={() => setWaypointMode("waypoint")}
+          disabled={layout.readOnly}
+        >
+          <IconWaypoint />
+        </button>
+      </Tooltip>
+      <Tooltip content={t("divider")} position="bottom">
+        <button
+          className={`py-1 px-2 hover-2 rounded-sm flex items-center disabled:opacity-50 ${waypointMode === "divider" ? "text-blue-500" : ""}`}
+          onClick={() => setWaypointMode("divider")}
+          disabled={layout.readOnly}
+        >
+          <IconDivider />
+        </button>
+      </Tooltip>
+      <div className="h-4 w-px bg-zinc-300 dark:bg-zinc-600 mx-1" />
       {relationshipOptions.map((option) => (
         <Tooltip
           key={option.type}
@@ -86,15 +107,6 @@ export default function RelationshipToolbar({
           </button>
         </Tooltip>
       )}
-      <Tooltip content={t("rotate")} position="bottom">
-        <button
-          className="py-1 px-2 hover-2 rounded-sm flex items-center disabled:opacity-50"
-          onClick={rotateRelationshipName}
-          disabled={layout.readOnly || !hasSelectedRelationships}
-        >
-          <IconRotationStroked />
-        </button>
-      </Tooltip>
       {(selectedElement.element !== ObjectType.NONE ||
         bulkSelectedElements.length > 0) && (
         <Tooltip content={t("delete")} position="bottom">

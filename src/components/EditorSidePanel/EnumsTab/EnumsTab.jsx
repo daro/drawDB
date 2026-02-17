@@ -1,5 +1,5 @@
 import { Button, Collapse } from "@douyinfe/semi-ui";
-import { useEnums, useLayout } from "../../../hooks";
+import { useEnums, useLayout } from "@hooks";
 import { IconPlus } from "@douyinfe/semi-icons";
 import { useTranslation } from "react-i18next";
 import SearchBar from "./SearchBar";

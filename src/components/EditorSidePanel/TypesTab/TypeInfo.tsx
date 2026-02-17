@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Action, ObjectType } from "../../../data/constants";
+import { Action, ObjectType } from "@data/constants";
 import {
   Collapse,
   Row,
@@ -10,12 +10,12 @@ import {
   Card,
 } from "@douyinfe/semi-ui";
 import { IconDeleteStroked, IconPlus } from "@douyinfe/semi-icons";
-import { useUndoRedo, useTypes, useDiagram, useLayout } from "../../../hooks";
+import { useUndoRedo, useTypes, useDiagram, useLayout } from "@hooks";
 import TypeField from "./TypeField";
 import { useTranslation } from "react-i18next";
 import { nanoid } from "nanoid";
 
-import { TypeInfoProps, IType } from "../../../types";
+import { TypeInfoProps, IType } from "@types";
 
 export default function TypeInfo({ index, data }: TypeInfoProps) {
   const { layout } = useLayout();

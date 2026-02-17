@@ -2,12 +2,12 @@ import { useState, useRef } from "react";
 import { Button, Collapse, TextArea, Input } from "@douyinfe/semi-ui";
 import ColorPicker from "../ColorPicker";
 import { IconDeleteStroked } from "@douyinfe/semi-icons";
-import { Action, ObjectType } from "../../../data/constants";
-import { useLayout, useNotes, useUndoRedo } from "../../../hooks";
+import { Action, ObjectType } from "@data/constants";
+import { useLayout, useNotes, useUndoRedo } from "@hooks";
 import { useTranslation } from "react-i18next";
 import ColorList from "../../ColorList";
 
-import { INote, NoteInfoProps } from "../../../types";
+import { INote, NoteInfoProps } from "@types";
 
 export default function NoteInfo({ data, nid }: NoteInfoProps) {
   const { layout } = useLayout();

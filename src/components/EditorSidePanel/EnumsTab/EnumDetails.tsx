@@ -1,10 +1,10 @@
 import { useState, ReactNode } from "react";
 import { Button, Input, TagInput } from "@douyinfe/semi-ui";
 import { IconDeleteStroked } from "@douyinfe/semi-icons";
-import { useDiagram, useEnums, useLayout, useUndoRedo } from "../../../hooks";
-import { Action, ObjectType } from "../../../data/constants";
+import { useDiagram, useEnums, useLayout, useUndoRedo } from "@hooks";
+import { Action, ObjectType } from "@data/constants";
 import { useTranslation } from "react-i18next";
-import { IEnum, EnumDetailsProps } from "../../../types";
+import { IEnum, EnumDetailsProps } from "@types";
 
 /**
  * A component representing the details of an enum in the side panel.

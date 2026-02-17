@@ -1,12 +1,12 @@
 import { createContext, ReactNode, useMemo } from "react";
-import { useTransform, useUndoRedo, useSelect, useSettings } from "../hooks";
+import { useTransform, useUndoRedo, useSelect, useSettings } from "@hooks";
 import { useTranslation } from "react-i18next";
-import { DiagramContextType } from "../types";
-import { useTableActions } from "../hooks/diagram/useTableActions";
-import { useRelationshipActions } from "../hooks/diagram/useRelationshipActions";
-import { useDiagramUiState } from "../hooks/diagram/useDiagramUiState";
-import { useDiagramState } from "../hooks/diagram/useDiagramState";
-import { getGroupPoints } from "../utils/diagram/geometry";
+import { DiagramContextType } from "@types";
+import { useTableActions } from "./Diagram/hooks/useTableActions";
+import { useRelationshipActions } from "./Diagram/hooks/useRelationshipActions";
+import { useDiagramUiState } from "./Diagram/hooks/useDiagramUiState";
+import { useDiagramState } from "./Diagram/hooks/useDiagramState";
+import { getGroupPoints } from "@utils/diagram/geometry";
 
 export const DiagramContext = createContext<DiagramContextType>({} as DiagramContextType);
 
@@ -38,6 +38,8 @@ export default function DiagramContextProvider({ children }: { children: ReactNo
     setHoveredTable,
     relationshipType,
     setRelationshipType,
+    waypointMode,
+    setWaypointMode,
   } = useDiagramUiState();
 
   const {
@@ -132,6 +134,8 @@ export default function DiagramContextProvider({ children }: { children: ReactNo
       setHoveredTable,
       relationshipType,
       setRelationshipType,
+      waypointMode,
+      setWaypointMode,
     }),
     [
       tables,
@@ -168,6 +172,8 @@ export default function DiagramContextProvider({ children }: { children: ReactNo
       setHoveredTable,
       relationshipType,
       setRelationshipType,
+      waypointMode,
+      setWaypointMode,
     ],
   );
 

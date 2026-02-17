@@ -1,9 +1,9 @@
 import React from "react";
 import { SideSheet } from "@douyinfe/semi-ui";
 import { useTranslation } from "react-i18next";
-import { ObjectType } from "../../data/constants";
+import { ObjectType } from "@data/constants";
 import RelationshipInfo from "../EditorSidePanel/RelationshipsTab/RelationshipInfo";
-import { IRelationship } from "../../types";
+import { IRelationship } from "@types";
 
 interface RelationshipEditSideSheetProps {
   data: IRelationship;

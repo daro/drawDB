@@ -1,7 +1,7 @@
-import { useSelect, useTexts } from "../../../hooks";
+import { useSelect, useTexts } from "@hooks";
 import Empty from "../Empty";
 import TextInfo from "./TextInfo";
-import { ObjectType } from "../../../data/constants";
+import { ObjectType } from "@data/constants";
 import { useTranslation } from "react-i18next";
 import { Collapse } from "@douyinfe/semi-ui";
 

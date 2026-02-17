@@ -1,4 +1,3 @@
-export { default as useForceUpdate } from "./useForceUpdate";
 export { default as useAreas } from "./useAreas";
 export { default as useCanvas } from "./useCanvas";
 export { default as useFullscreen } from "./useFullscreen";
@@ -15,8 +14,8 @@ export { default as useUndoRedo } from "./useUndoRedo";
 export { default as useEnums } from "./useEnums";
 export { default as useTexts } from "./useTexts";
 export { default as useThemedPage } from "./useThemedPage";
-export * from "./useCanvasInteraction";
-export * from "./useBulkSelection";
-export * from "./useCanvasPanning";
-export * from "./useLinkingLogic";
-export { useTableStyle } from "./useTableStyle";
+
+export { useObjectStatus } from "./common/useObjectStatus";
+export { useObjectResize } from "./common/useObjectResize";
+export { useObjectColorEdit } from "./common/useObjectColorEdit";
+export { useObjectRotation } from "./common/useObjectRotation";

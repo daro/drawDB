@@ -5,8 +5,8 @@ import {
 } from "./path/geometry";
 import { PathCommander } from "./path/PathCommander";
 import { DrawableNode, RelationshipData, PathOptions } from "./path/types";
-import { TABLE_CONFIG } from "../data/constants";
-import { IPoint } from "../types";
+import { TABLE_CONFIG } from "@data/constants";
+import { IPoint } from "@types";
 import { waypointRouter } from "./path/routers/waypointRouter";
 import { bracketRouter } from "./path/routers/bracketRouter";
 import { directRouter } from "./path/routers/directRouter";

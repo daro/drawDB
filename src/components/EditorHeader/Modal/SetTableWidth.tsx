@@ -1,5 +1,5 @@
 import { InputNumber } from "@douyinfe/semi-ui";
-import { useLayout, useSettings } from "../../../hooks";
+import { useLayout, useSettings } from "@hooks";
 import React from "react";
 
 export default function SetTableWidth() {

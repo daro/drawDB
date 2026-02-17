@@ -1,9 +1,10 @@
 import { Dropdown } from "@douyinfe/semi-ui";
-import { IRelationship, IWaypoint } from "../../types";
-import { ObjectType } from "../../data/constants";
-import { findClosestPoint } from "../../utils/calcPath";
+import { IRelationship, IWaypoint } from "@types";
+import { ObjectType, Cardinality, Action } from "@data/constants";
+import { findClosestPoint } from "@utils/calcPath";
 import { RefObject } from "react";
 import { useTranslation } from "react-i18next";
+import { useUndoRedo } from "@hooks";
 
 interface WaypointMarkersProps {
   data: IRelationship;
@@ -28,6 +29,7 @@ export default function WaypointMarkers({
   pathD,
 }: WaypointMarkersProps & { pathD: string }) {
   const { t } = useTranslation();
+  const { setUndoStack, setRedoStack } = useUndoRedo();
 
   if (!(isHighlighted || (selectedElement.id == data.id && selectedElement.element === ObjectType.RELATIONSHIP))) {
     return null;
@@ -92,6 +94,23 @@ export default function WaypointMarkers({
                       y,
                       pathRatio
                     };
+
+                    setUndoStack((prev) => [
+                      ...prev,
+                      {
+                        action: Action.EDIT,
+                        element: ObjectType.RELATIONSHIP,
+                        rid: data.id,
+                        undo: { waypoints: data.waypoints || [] },
+                        redo: { waypoints: updatedWaypoints },
+                        message: t("edit_relationship", {
+                          refName: data.name,
+                          extra: `[${t("waypoint")}]`,
+                        }),
+                      },
+                    ]);
+                    setRedoStack([]);
+
                     updateRelationship(data.id, {
                       waypoints: updatedWaypoints,
                     });

@@ -1,10 +1,10 @@
 import { createContext, useState, ReactNode, Dispatch, SetStateAction } from "react";
-import { Action, ObjectType } from "../data/constants";
+import { Action, ObjectType } from "@data/constants";
 import { Toast } from "@douyinfe/semi-ui";
 import { useTranslation } from "react-i18next";
-import { useUndoRedo } from "../hooks";
+import { useUndoRedo } from "@hooks";
 import { nanoid } from "nanoid";
-import { IEnum } from "../types";
+import { IEnum } from "@types";
 
 interface EnumsContextType {
   enums: IEnum[];

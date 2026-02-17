@@ -1,5 +1,5 @@
 import { PathArray } from "svg-path-commander";
-import { NOTE_CONFIG } from "../../data/constants";
+import { NOTE_CONFIG } from "@data/constants";
 
 export const getNoteGeometry = (x: number, y: number, width: number, height: number) => {
   const mainSegments: PathArray = [

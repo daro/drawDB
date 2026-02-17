@@ -1,9 +1,9 @@
-import { Cardinality } from "../../data/constants";
-import { dbToTypes } from "../../data/datatypes";
-import i18n from "../../i18n/i18n";
+import { Cardinality } from "@data/constants";
+import { dbToTypes } from "@data/datatypes";
+import i18n from "@i18n/i18n";
 import { escapeQuotes } from "../exportSQL/shared";
 import { isFunction, isKeyword } from "../utils";
-import type { IField, IDiagram, IRelationship } from "../../types";
+import type { IField, IDiagram, IRelationship, ITable } from "@types";
 
 const IDENT_SAFE_RE = /^[A-Za-z_][A-Za-z0-9_]*$/;
 
@@ -110,8 +110,10 @@ function processType(type: string): string {
   return type.toLowerCase();
 }
 
-interface DiagramWithDatabase extends IDiagram {
+interface DiagramWithDatabase extends Partial<IDiagram> {
   database: string;
+  tables: ITable[];
+  relationships: IRelationship[];
 }
 
 export function toDBML(diagram: DiagramWithDatabase): string {

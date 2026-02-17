@@ -1,4 +1,4 @@
-import { TABLE_CONFIG } from "../../data/constants";
+import { TABLE_CONFIG } from "@data/constants";
 
 const { HEIGHT: tableHeaderHeight, COLOR_STRIP_HEIGHT: tableColorStripHeight } = TABLE_CONFIG.HEADER;
 const { FIELD_HEIGHT: tableFieldHeight } = TABLE_CONFIG;

@@ -5,12 +5,12 @@ import {
   IconSetting,
 } from "@douyinfe/semi-icons";
 import { Dropdown } from "@douyinfe/semi-ui";
-import { useFullscreen, useLayout } from "../../hooks";
-import { enterFullscreen, exitFullscreen } from "../../utils/fullscreen";
+import { useFullscreen, useLayout } from "@hooks";
+import { enterFullscreen, exitFullscreen } from "@utils/fullscreen";
 import { useTranslation } from "react-i18next";
-import { isRtl } from "../../i18n/utils/rtl";
-import i18n from "../../i18n/i18n";
-import { MODAL } from "../../data/constants";
+import { isRtl } from "@i18n/utils/rtl";
+import i18n from "@i18n/i18n";
+import { MODAL } from "@data/constants";
 
 export default function LayoutDropdown({ setModal }) {
   const fullscreen = useFullscreen();

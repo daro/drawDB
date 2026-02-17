@@ -1,7 +1,7 @@
 import SVGPathCommander, { PathArray } from "svg-path-commander";
 import { PathCommander } from "./PathCommander";
 import { Point, DrawableNode } from "./types";
-import { IPoint } from "../../types";
+import { IPoint } from "@types";
 
 /**
  * Geometry helpers for building SVG path segments with rounded corners.

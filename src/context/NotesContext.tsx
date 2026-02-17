@@ -1,9 +1,9 @@
 import { createContext, useState, useCallback, ReactNode, Dispatch, SetStateAction } from "react";
-import { Action, ObjectType, NOTE_CONFIG } from "../data/constants";
-import { useUndoRedo, useTransform, useSelect } from "../hooks";
+import { Action, ObjectType, NOTE_CONFIG, GRID_CONFIG } from "@data/constants";
+import { useUndoRedo, useTransform, useSelect, useSettings } from "@hooks";
 import { Toast } from "@douyinfe/semi-ui";
 import { useTranslation } from "react-i18next";
-import { INote } from "../types";
+import { INote } from "@types";
 import { nanoid } from "nanoid";
 
 interface NotesContextType {
@@ -28,6 +28,7 @@ export default function NotesContextProvider({ children }: { children: ReactNode
   const { t } = useTranslation();
   const [notes, setNotes] = useState<INote[]>([]);
   const { transform } = useTransform();
+  const { settings } = useSettings();
   const { setUndoStack, setRedoStack } = useUndoRedo();
   const { selectedElement, setSelectedElement } = useSelect();
 
@@ -40,10 +41,16 @@ export default function NotesContextProvider({ children }: { children: ReactNode
       });
     } else {
       const height = 88;
+      let x = transform.pan.x;
+      let y = transform.pan.y - height / 2;
+      if (settings.snapToGrid) {
+        x = Math.round(x / GRID_CONFIG.SIZE) * GRID_CONFIG.SIZE;
+        y = Math.round(y / GRID_CONFIG.SIZE) * GRID_CONFIG.SIZE;
+      }
       const newNote: INote = {
         id: nanoid(),
-        x: transform.pan.x,
-        y: transform.pan.y - height / 2,
+        x,
+        y,
         title: `note_${notes.length}`,
         content: "",
         locked: false,

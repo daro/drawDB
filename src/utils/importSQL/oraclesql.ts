@@ -1,9 +1,9 @@
-// @ts-nocheck
 import { nanoid } from "nanoid";
-import { Cardinality, Constraint, DB } from "../../data/constants";
-import { dbToTypes } from "../../data/datatypes";
+import { Cardinality, Constraint, DB, DBType } from "@data/constants";
+import { dbToTypes } from "@data/datatypes";
+import { IImportData, ITable, IRelationship, IField, IEnum } from "@types";
 
-const affinity = {
+const affinity: Record<string, Record<string, string>> = {
   [DB.ORACLESQL]: new Proxy(
     {
       INT: "INTEGER",
@@ -11,37 +11,52 @@ const affinity = {
       DECIMAL: "NUMBER",
       CHARACTER: "CHAR",
     },
-    { get: (target, prop) => (prop in target ? target[prop] : "BLOB") },
+    { get: (target, prop: string) => (prop in target ? target[prop] : "BLOB") },
   ),
   [DB.GENERIC]: new Proxy(
     {
       INTEGER: "INT",
       MEDIUMINT: "INTEGER",
     },
-    { get: (target, prop) => (prop in target ? target[prop] : "BLOB") },
+    { get: (target, prop: string) => (prop in target ? target[prop] : "BLOB") },
   ),
 };
 
-export function fromOracleSQL(ast, diagramDb = DB.GENERIC) {
-  const tables = [];
-  const relationships = [];
-  const enums = [];
+export function fromOracleSQL(ast: any[], diagramDb: DBType = DB.GENERIC): IImportData {
+  const tables: ITable[] = [];
+  const relationships: IRelationship[] = [];
+  const enums: IEnum[] = [];
 
-  const parseSingleStatement = (e) => {
+  const parseSingleStatement = (e: any) => {
     if (e.operation === "create") {
       if (e.object === "table") {
-        const table = {};
-        table.name = e.name.name;
-        table.comment = "";
-        table.color = "#175e7a";
-        table.fields = [];
-        table.indices = [];
-        table.id = nanoid();
-        e.table.relational_properties.forEach((d) => {
+        const table: ITable = {
+          id: nanoid(),
+          name: e.name.name,
+          comment: "",
+          color: "#175e7a",
+          fields: [],
+          indices: [],
+          x: 0,
+          y: 0,
+          width: 0,
+          height: 0,
+          locked: false,
+        };
+        e.table.relational_properties.forEach((d: any) => {
           if (d.resource === "column") {
-            const field = {};
-            field.id = nanoid();
-            field.name = d.name;
+            const field: IField = {
+              id: nanoid(),
+              name: d.name,
+              type: "",
+              default: "",
+              check: "",
+              primary: false,
+              unique: false,
+              notNull: false,
+              increment: false,
+              comment: "",
+            };
 
             let type = d.type.type.toUpperCase();
             if (!dbToTypes[diagramDb][type]) {
@@ -54,14 +69,6 @@ export function fromOracleSQL(ast, diagramDb = DB.GENERIC) {
             } else if (d.type.size || d.type.precision) {
               field.size = d.type.size || d.type.precision;
             }
-
-            field.comment = "";
-            field.check = "";
-            field.default = "";
-            field.unique = false;
-            field.increment = false;
-            field.notNull = false;
-            field.primary = false;
 
             for (const c of d.constraints) {
               if (c.constraint.primary_key === "primary key")
@@ -81,7 +88,6 @@ export function fromOracleSQL(ast, diagramDb = DB.GENERIC) {
 
             table.fields.push(field);
           } else if (d.resource === "constraint") {
-            const relationship = {};
             const startFieldName = d.constraint.columns[0];
             const endFieldName = d.constraint.reference.columns[0];
             const endTableName = d.constraint.reference.object.name;
@@ -99,28 +105,24 @@ export function fromOracleSQL(ast, diagramDb = DB.GENERIC) {
             );
             if (!startField) return;
 
-            relationship.id = nanoid();
-            relationship.startTableId = table.id;
-            relationship.startFieldId = startField.id;
-            relationship.endTableId = endTable.id;
-            relationship.endFieldId = endField.id;
-            relationship.updateConstraint = Constraint.NONE;
-            relationship.name =
-              d.name && Boolean(d.name.trim())
+            const relationship: IRelationship = {
+              id: nanoid(),
+              startTableId: table.id,
+              startFieldId: startField.id,
+              endTableId: endTable.id,
+              endFieldId: endField.id,
+              updateConstraint: Constraint.NONE,
+              name: d.name && Boolean(d.name.trim())
                 ? d.name
-                : `fk_${table.name}_${startFieldName}_${endTableName}`;
-            relationship.deleteConstraint =
-              d.constraint.reference.on_delete &&
-              Boolean(d.constraint.reference.on_delete.trim())
-                ? d.constraint.reference.on_delete[0].toUpperCase() +
-                  d.constraint.reference.on_delete.substring(1)
-                : Constraint.NONE;
-
-            if (startField.unique) {
-              relationship.cardinality = Cardinality.ONE_TO_ONE;
-            } else {
-              relationship.cardinality = Cardinality.MANY_TO_ONE;
-            }
+                : `fk_${table.name}_${startFieldName}_${endTableName}`,
+              deleteConstraint:
+                d.constraint.reference.on_delete &&
+                Boolean(d.constraint.reference.on_delete.trim())
+                  ? d.constraint.reference.on_delete[0].toUpperCase() +
+                    d.constraint.reference.on_delete.substring(1)
+                  : Constraint.NONE,
+              cardinality: startField.unique ? Cardinality.ONE_TO_ONE : Cardinality.MANY_TO_ONE,
+            };
 
             relationships.push(relationship);
           }
@@ -132,5 +134,12 @@ export function fromOracleSQL(ast, diagramDb = DB.GENERIC) {
 
   ast.forEach((e) => parseSingleStatement(e));
 
-  return { tables, relationships, enums };
+  return { 
+    tables, 
+    relationships, 
+    enums,
+    xorGroups: [],
+    orGroups: [],
+    types: []
+  };
 }

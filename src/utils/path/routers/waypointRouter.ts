@@ -1,6 +1,6 @@
 import { PathArray } from "svg-path-commander";
 import { PathCommander } from "../PathCommander";
-import { IPoint } from "../../../types";
+import { IPoint } from "@types";
 import { PathRouter, PathSection } from "./types";
 import { getBracketSegment } from "./getBracketSegment";
 import { getOrthogonalSegments } from "../geometry";

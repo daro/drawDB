@@ -1,8 +1,8 @@
 import { Upload, Checkbox, Banner, Tabs, TabPane } from "@douyinfe/semi-ui";
-import { STATUS } from "../../../data/constants";
+import { STATUS } from "@data/constants";
 import { useTranslation } from "react-i18next";
 import CodeEditor from "../../CodeEditor";
-import { ImportSourceProps } from "../../../types";
+import { ImportSourceProps } from "@types";
 
 export default function ImportSource({
   importData,

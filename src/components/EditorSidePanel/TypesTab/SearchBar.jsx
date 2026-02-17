@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { AutoComplete } from "@douyinfe/semi-ui";
 import { IconSearch } from "@douyinfe/semi-icons";
-import { useSelect, useTypes } from "../../../hooks";
-import { ObjectType } from "../../../data/constants";
+import { useSelect, useTypes } from "@hooks";
+import { ObjectType } from "@data/constants";
 import { useTranslation } from "react-i18next";
 
 export default function Searchbar() {

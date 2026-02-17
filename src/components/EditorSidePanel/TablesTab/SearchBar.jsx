@@ -1,8 +1,8 @@
 import { useMemo } from "react";
-import { useSelect } from "../../../hooks";
+import { useSelect } from "@hooks";
 import { TreeSelect } from "@douyinfe/semi-ui";
 import { IconSearch } from "@douyinfe/semi-icons";
-import { ObjectType } from "../../../data/constants";
+import { ObjectType } from "@data/constants";
 import { useTranslation } from "react-i18next";
 
 export default function SearchBar({ tables }) {
@@ -29,16 +29,22 @@ export default function SearchBar({ tables }) {
       };
     });
   }, [tables]);
-
+  const searchPosition = "dropdown";
+  //const searchPosition = "trigger";
   return (
     <TreeSelect
-      searchPosition="trigger"
+      searchAutoFocus={false}
+      searchPosition={searchPosition}
       dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
       treeData={treeData}
       prefix={<IconSearch />}
       emptyContent={<div className="p-3 popover-theme">{t("not_found")}</div>}
       filterTreeNode
       placeholder={t("search")}
+      searchRender={(inputProps) => {
+        const { autofocus, ...rest } = inputProps;
+        return <Input {...rest} autoFocus={autofocus} />;
+      }}
       onChange={(node) => {
         const { tableId, id, children } = node;
 

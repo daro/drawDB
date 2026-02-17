@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback, createContext } from "react";
-import ControlPanel from "./EditorHeader/ControlPanel";
-import Canvas from "./EditorCanvas/Canvas";
-import { CanvasContextProvider } from "../context/CanvasContext";
-import SidePanel from "./EditorSidePanel/SidePanel";
-import { DB, State } from "../data/constants";
-import { db, DiagramData, TemplateData } from "../data/db";
+import ControlPanel from "@components/EditorHeader/ControlPanel";
+import Canvas from "@components/EditorCanvas/Canvas";
+import { CanvasContextProvider } from "@context/CanvasContext";
+import SidePanel from "@components/EditorSidePanel/SidePanel";
+import { DB, State } from "@data/constants";
+import { db, DiagramData, TemplateData } from "@data/db";
 import {
   useLayout,
   useSettings,
@@ -18,24 +18,24 @@ import {
   useSaveState,
   useEnums,
   useTexts,
-} from "../hooks";
-import FloatingControls from "./FloatingControls";
-import SourceCodeFooter from "./SourceCodeFooter";
+} from "@hooks";
+import FloatingControls from "@components/FloatingControls";
+import SourceCodeFooter from "@components/SourceCodeFooter";
 import { Button, Modal, Tag } from "@douyinfe/semi-ui";
 import { IconAlertTriangle } from "@douyinfe/semi-icons";
 import { useTranslation } from "react-i18next";
-import { databases } from "../data/databases";
-import { isRtl } from "../i18n/utils/rtl";
+import { databases } from "@data/databases";
+import { isRtl } from "@i18n/utils/rtl";
 import { useSearchParams } from "react-router-dom";
-import { get, SHARE_FILENAME } from "../api/gists";
+import { get, SHARE_FILENAME } from "@/api/gists";
 import { nanoid } from "nanoid";
-import { getTableHeight } from "../utils/utils";
-import { tableWidth } from "../data/constants";
-import { IIdContext } from "../types";
+import { getTableHeight } from "@utils/utils";
+import { tableWidth } from "@data/constants";
+import { IIdContext } from "@types";
 
-import { useWorkspacePersistence } from "../hooks/useWorkspacePersistence";
-import { useWorkspaceGist } from "../hooks/useWorkspaceGist";
-import { useWorkspaceState } from "../hooks/useWorkspaceState";
+import { useWorkspacePersistence } from "./Workspace/hooks/useWorkspacePersistence";
+import { useWorkspaceGist } from "./Workspace/hooks/useWorkspaceGist";
+import { useWorkspaceState } from "./Workspace/hooks/useWorkspaceState";
 
 export const IdContext = createContext<IIdContext>({
   gistId: "",

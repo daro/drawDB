@@ -2,15 +2,17 @@ import { Switch, Typography, Divider, Dropdown, Button } from "@douyinfe/semi-ui
 import { useTranslation } from "react-i18next";
 import { IconChevronDown, IconDeleteStroked, IconPlus } from "@douyinfe/semi-icons";
 import { SettingItem } from "../Settings";
-import { colorPresets } from "../../../../data/colorPresets";
+import { colorPresets } from "@data/colorPresets";
 import ColorPicker from "../../../EditorSidePanel/ColorPicker";
+import type { ISettings } from "@types";
+import type { ILayout } from "@context/LayoutContext";
 
 const { Title, Text } = Typography;
 
 interface ColorAndThemeProps {
-  settings: Record<string, unknown>;
-  layout: Record<string, unknown>;
-  invertSettings: (setting: string) => void;
+  settings: ISettings;
+  layout: ILayout;
+  invertSettings: (setting: keyof ISettings) => void;
   addColor: () => void;
   updateColor: (index: number, color: string) => void;
   removeColor: (index: number) => void;
@@ -27,20 +29,20 @@ export default function ColorAndTheme({
   applyPreset,
 }: ColorAndThemeProps) {
   const { t } = useTranslation();
-  const tableColors = settings.tableColors || [];
+  const tableColors = settings.tableColors ?? [];
 
   return (
     <section>
       <Title heading={5} className="pb-6">
-        {(t as any)("color_and_theme")}
+        {t("color_and_theme")}
       </Title>
       <div className="space-y-1">
         <SettingItem
           id="setting_outbound_relations_in_table_color"
-          label={(t as any)("outbound_relations_in_table_color")}
+          label={t("outbound_relations_in_table_color")}
         >
           <Switch
-            checked={settings.outboundRelationsInTableColor}
+            checked={settings.outboundRelationsInTableColor ?? false}
             onChange={() =>
               invertSettings("outboundRelationsInTableColor")
             }
@@ -48,10 +50,10 @@ export default function ColorAndTheme({
         </SettingItem>
         <SettingItem
           id="setting_relation_animations_in_table_color"
-          label={(t as any)("relation_animations_in_table_color")}
+          label={t("relation_animations_in_table_color")}
         >
           <Switch
-            checked={settings.relationAnimationsInTableColor}
+            checked={settings.relationAnimationsInTableColor ?? false}
             onChange={() =>
               invertSettings("relationAnimationsInTableColor")
             }
@@ -92,9 +94,7 @@ export default function ColorAndTheme({
                 icon={<IconChevronDown />}
                 iconPosition="right"
                 size="small"
-                // @ts-ignore
                 theme="light"
-                {...( {} as any )}
               >
                 {t("apply_preset")}
               </Button>
@@ -115,7 +115,7 @@ export default function ColorAndTheme({
                   <button
                     type="button"
                     disabled={layout.readOnly}
-                    className={[
+                    className={[ 
                       "h-8 w-8 rounded-full",
                       "border border-zinc-300 dark:border-zinc-600",
                       "shadow-sm",

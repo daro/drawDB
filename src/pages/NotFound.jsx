@@ -1,4 +1,4 @@
-import { socials } from "../data/socials";
+import { socials } from "@data/socials";
 
 export default function NotFound() {
   return (

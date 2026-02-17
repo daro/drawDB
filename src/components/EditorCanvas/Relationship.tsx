@@ -1,17 +1,21 @@
-import React, { useRef, useState } from "react";
-import { ObjectType, Tab, Action, } from "../../data/constants";
-import { useDiagram, useSettings, useLayout, useSelect, useCanvas, useUndoRedo, useForceUpdate } from "../../hooks";
+import React, { useRef, useState, useMemo } from "react";
+import { ObjectType, Tab, Action, Cardinality } from "@data/constants";
+import { useDiagram, useSettings, useLayout, useSelect, useCanvas, useUndoRedo } from "@hooks";
+import useForceUpdate from "./Relationship/hooks/useForceUpdate";
 import { useTranslation } from "react-i18next";
-import { IWaypoint, RelationshipProps } from "../../types";
-import { useRelationshipOffsets } from "../../hooks/useRelationshipOffsets";
-import { useRelationshipStatus } from "../../hooks/useRelationshipStatus";
-import { useRelationshipPath } from "../../hooks/useRelationshipPath";
-import { useWaypointInteraction } from "../../hooks/useWaypointInteraction";
+import { Toast } from "@douyinfe/semi-ui";
+import { IRelationship, IWaypoint, RelationshipProps } from "@types";
+import { useRelationshipOffsets } from "./Relationship/hooks/useRelationshipOffsets";
+import { useRelationshipStatus } from "./Relationship/hooks/useRelationshipStatus";
+import { useRelationshipPath } from "./Relationship/hooks/useRelationshipPath";
+import { useWaypointInteraction } from "./Relationship/hooks/useWaypointInteraction";
 import { RelationshipSymbols } from "./RelationshipSymbols";
 import RelationshipLabels from "./RelationshipLabels";
 import WaypointMarkers from "./WaypointMarkers";
 import RelationshipPath from "./RelationshipPath";
 import RelationshipEditSideSheet from "./RelationshipEditSideSheet";
+import { CanvasObject } from "./common/CanvasObject";
+import RelationshipInfo from "../EditorSidePanel/RelationshipsTab/RelationshipInfo";
 
 
 /**
@@ -22,14 +26,24 @@ import RelationshipEditSideSheet from "./RelationshipEditSideSheet";
  * @returns {JSX.Element | null} The rendered relationship.
  */
 function Relationship({ data, onPointerDown }: RelationshipProps) {
-  const { settings } = useSettings();
-  const { tables, relationships, xorGroups, orGroups, updateRelationship } = useDiagram();
   const { layout } = useLayout();
-  const { selectedElement, setSelectedElement, bulkSelectedElements, setBulkSelectedElements } = useSelect();
+  const { 
+    settings 
+  } = useSettings();
+  const { 
+    tables, 
+    relationships, 
+    xorGroups, 
+    orGroups, 
+    updateRelationship, 
+    waypointMode,
+  } = useDiagram();
+  const { selectedElement, setSelectedElement, bulkSelectedElements, setBulkSelectedElements, emitSelect } = useSelect();
   const { setUndoStack, setRedoStack } = useUndoRedo();
   const { pointer } = useCanvas();
   const { t } = useTranslation();
   const forceUpdate = useForceUpdate();
+  const [labelBbox, setLabelBbox] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [dragging, setDragging] = useState<{
     id?: string | number;
@@ -151,12 +165,32 @@ function Relationship({ data, onPointerDown }: RelationshipProps) {
     e.preventDefault();
     e.stopPropagation();
 
+    if (waypointMode === "divider") {
+      const isOneToMany =
+        data.cardinality === Cardinality.ONE_TO_MANY ||
+        data.cardinality === "one_to_many";
+      const isManyToOne =
+        data.cardinality === Cardinality.MANY_TO_ONE ||
+        data.cardinality === "many_to_one";
+      if (!isOneToMany && !isManyToOne) {
+        Toast.info("Divider can only be added to 1:n or n:1 relationships");
+        return;
+      }
+    }
+
+    let currentWaypoints = data.waypoints || [];
+    if (waypointMode === "divider") {
+      currentWaypoints = currentWaypoints.map((wp) =>
+        wp.mode === "divider" ? { ...wp, mode: "floating" as any } : wp
+      );
+    }
+
     const newWaypoints: IWaypoint[] = [
-      ...(data.waypoints || []),
+      ...currentWaypoints,
       {
         x: pointer.spaces.diagram.x,
         y: pointer.spaces.diagram.y,
-        mode: "waypoint",
+        mode: waypointMode as any,
       },
     ];
 
@@ -188,7 +222,7 @@ function Relationship({ data, onPointerDown }: RelationshipProps) {
     const isLabel = (e.target as HTMLElement).closest("g")?.classList.contains("cursor-move");
     
     if (!isLabel) {
-      onPointerDown(e);
+      emitSelect(data.id, ObjectType.RELATIONSHIP, e);
     }
 
     e.stopPropagation();
@@ -201,16 +235,17 @@ function Relationship({ data, onPointerDown }: RelationshipProps) {
         id: data.id,
         waypointIndex: index,
         initialWaypoints: data.waypoints,
+        open: false,
       }));
 
+      const elementInBulk = {
+        id: data.id,
+        type: ObjectType.WAYPOINT,
+        waypointIndex: index,
+      };
+
       if (!(e.ctrlKey || e.metaKey)) {
-        setBulkSelectedElements([
-          {
-            id: data.id,
-            type: ObjectType.WAYPOINT,
-            waypointIndex: index,
-          },
-        ]);
+        setBulkSelectedElements([elementInBulk]);
       } else {
         const isAlreadyInBulk = bulkSelectedElements.some(
           (el) =>
@@ -229,14 +264,16 @@ function Relationship({ data, onPointerDown }: RelationshipProps) {
                 ),
             ),
           );
+          setSelectedElement((prev) => ({
+            ...prev,
+            element: ObjectType.NONE,
+            id: "",
+            open: false,
+          }));
         } else {
           setBulkSelectedElements((prev) => [
             ...prev,
-            {
-              id: data.id,
-              type: ObjectType.WAYPOINT,
-              waypointIndex: index,
-            },
+            elementInBulk,
           ]);
         }
       }
@@ -318,19 +355,43 @@ function Relationship({ data, onPointerDown }: RelationshipProps) {
   )
     return null;
 
+  const relationshipLabel = (
+    <RelationshipLabels
+      name={data.name}
+      labelX={labelX}
+      labelY={labelY}
+      labelRef={labelRef}
+      isAnimated={isAnimated}
+      isHovered={isHovered}
+      mode={settings.mode}
+      sideLabelStartX={sideLabelStartX}
+      sideLabelStartY={sideLabelStartY}
+      sideLabelStart={sideLabelStart}
+      sideLabelEndX={sideLabelEndX}
+      sideLabelEndY={sideLabelEndY}
+      sideLabelEnd={sideLabelEnd}
+      relationshipNameFontSize={settings.relationshipNameFontSize}
+      relationshipSideLabelFontSize={settings.relationshipSideLabelFontSize}
+      showRelationshipNames={settings.showRelationshipNames}
+      showRelationshipLabels={settings.showRelationshipLabels}
+      nameRotation={data.nameRotation}
+      handleWaypointPointerDown={handleWaypointPointerDown}
+      dividerIndex={data.waypoints?.findIndex((wp) => wp.mode === "divider")}
+      isSelected={isSelected}
+      labelOffsetX={data.labelOffsetX}
+      labelOffsetY={data.labelOffsetY}
+    />
+  );
+
   return (
     <>
       <g
         className="select-none group"
         data-rel-id={data.id}
-        onDoubleClick={edit}
         onContextMenu={handleContextMenu}
         onPointerEnter={() => setIsHovered(true)}
         onPointerLeave={() => setIsHovered(false)}
-        onPointerDown={(e) => {
-          if (e.defaultPrevented) return;
-          onPointerDown(e);
-        }}
+        onPointerDown={onPointerDown}
       >
         <RelationshipPath
           data={data}
@@ -352,34 +413,95 @@ function Relationship({ data, onPointerDown }: RelationshipProps) {
           bulkSelectedElements={bulkSelectedElements}
           setBulkSelectedElements={setBulkSelectedElements}
           onPointerDown={onPointerDown}
+          edit={edit}
+          emitSelect={emitSelect}
         />
 
         {(settings.showRelationshipLabels || settings.showRelationshipNames) &&
           pathLength > 0 && (
-          <RelationshipLabels
-            name={data.name}
-            labelX={labelX}
-            labelY={labelY}
-            labelRef={labelRef}
-            isAnimated={isAnimated}
-            isHovered={isHovered}
-            mode={settings.mode}
-            sideLabelStartX={sideLabelStartX}
-            sideLabelStartY={sideLabelStartY}
-            sideLabelStart={sideLabelStart}
-            sideLabelEndX={sideLabelEndX}
-            sideLabelEndY={sideLabelEndY}
-            sideLabelEnd={sideLabelEnd}
-            relationshipNameFontSize={settings.relationshipNameFontSize}
-            relationshipSideLabelFontSize={settings.relationshipSideLabelFontSize}
-            showRelationshipNames={settings.showRelationshipNames}
-            showRelationshipLabels={settings.showRelationshipLabels}
-            nameRotation={data.nameRotation}
-            handleWaypointPointerDown={handleWaypointPointerDown}
-            dividerIndex={data.waypoints?.findIndex(wp => wp.mode === "divider")}
-            isSelected={isSelected}
-          />
-        )}
+            <>
+              {settings.showRelationshipLabels && (
+                <RelationshipLabels
+                  name={data.name}
+                  labelX={labelX}
+                  labelY={labelY}
+                  labelRef={labelRef}
+                  isAnimated={isAnimated}
+                  isHovered={isHovered}
+                  mode={settings.mode}
+                  sideLabelStartX={sideLabelStartX}
+                  sideLabelStartY={sideLabelStartY}
+                  sideLabelStart={sideLabelStart}
+                  sideLabelEndX={sideLabelEndX}
+                  sideLabelEndY={sideLabelEndY}
+                  sideLabelEnd={sideLabelEnd}
+                  relationshipNameFontSize={settings.relationshipNameFontSize}
+                  relationshipSideLabelFontSize={settings.relationshipSideLabelFontSize}
+                  showRelationshipNames={false}
+                  showRelationshipLabels={true}
+                  isSelected={isSelected}
+                />
+              )}
+              {settings.showRelationshipNames && (
+                <CanvasObject
+                  data={{
+                    id: data.id,
+                    x: labelX - (labelBbox?.width ?? 0) / 2,
+                    y: labelY - (labelBbox?.height ?? 0) / 2,
+                    width: labelBbox?.width ?? 0,
+                    height: labelBbox?.height ?? 0,
+                    rotation: data.nameRotation,
+                  }}
+                  objectType={ObjectType.RELATIONSHIP}
+                  tab={Tab.RELATIONSHIPS}
+                  scrollIdPrefix="scroll_rel_"
+                  updateCallback={(id, values: any) => {
+                    const updates: any = {};
+                    if (values.text !== undefined) updates.name = values.text;
+                    if (values.name !== undefined) updates.name = values.name;
+                    if (values.rotation !== undefined) updates.nameRotation = values.rotation;
+                    if (values.x !== undefined || values.y !== undefined) {
+                      const width = labelBbox?.width ?? 0;
+                      const height = labelBbox?.height ?? 0;
+                      if (values.x !== undefined) updates.labelOffsetX = values.x + width / 2 - labelAnchorX;
+                      if (values.y !== undefined) updates.labelOffsetY = values.y + height / 2 - labelAnchorY;
+                    }
+                    if (Object.keys(updates).length > 0) {
+                      updateRelationship(id, updates);
+                    }
+                  }}
+                  popoverContent={<RelationshipInfo data={data} />}
+                  showResizeHandles={false}
+                  showRotationHandle={true}
+                >
+                  {({ edit }) => (
+                    <g onDoubleClick={edit}>
+                      <RelationshipLabels
+                        name={data.name}
+                        labelX={labelX}
+                        labelY={labelY}
+                        labelRef={labelRef}
+                        isAnimated={isAnimated}
+                        isHovered={isHovered}
+                        mode={settings.mode}
+                        relationshipNameFontSize={settings.relationshipNameFontSize}
+                        showRelationshipNames={true}
+                        showRelationshipLabels={false}
+                        nameRotation={data.nameRotation}
+                        handleWaypointPointerDown={handleWaypointPointerDown}
+                        dividerIndex={data.waypoints?.findIndex((wp) => wp.mode === "divider")}
+                        isSelected={isSelected}
+                        labelOffsetX={data.labelOffsetX}
+                        labelOffsetY={data.labelOffsetY}
+                        onDoubleClick={edit}
+                        setBbox={setLabelBbox}
+                      />
+                    </g>
+                  )}
+                </CanvasObject>
+              )}
+            </>
+          )}
         {pathLength > 0 && settings.showCardinality && (
           <RelationshipSymbols
             settings={settings}

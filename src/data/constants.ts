@@ -120,6 +120,14 @@ export const Tab = {
 
 export type TabType = (typeof Tab)[keyof typeof Tab];
 
+export const WaypointMode = {
+  WAYPOINT: "waypoint",
+  FLOATING: "floating",
+  DIVIDER: "divider",
+} as const;
+
+export type WaypointModeType = (typeof WaypointMode)[keyof typeof WaypointMode];
+
 export const ObjectType = {
   NONE: 0,
   TABLE: 1,
@@ -173,6 +181,7 @@ export const MODAL = {
   SIDE_MARGIN: 12,
   TABLE_COLORS: 13,
   SETTINGS: 14,
+  SAVE_AS:15,
 } as const;
 
 export type ModalType = (typeof MODAL)[keyof typeof MODAL];
@@ -191,6 +200,7 @@ export const SIDESHEET = {
   TODO: 1,
   TIMELINE: 2,
   VERSIONS: 3,
+  HELP: 4,
 } as const;
 
 export type SideSheetType = (typeof SIDESHEET)[keyof typeof SIDESHEET];

@@ -2,12 +2,12 @@ import { useState, useRef } from "react";
 import { Button, Input } from "@douyinfe/semi-ui";
 import ColorPicker from "../ColorPicker";
 import { IconDeleteStroked } from "@douyinfe/semi-icons";
-import { useAreas, useLayout, useUndoRedo, useSettings } from "../../../hooks";
-import { Action, ObjectType } from "../../../data/constants";
+import { useAreas, useLayout, useUndoRedo, useSettings } from "@hooks";
+import { Action, ObjectType } from "@data/constants";
 import { useTranslation } from "react-i18next";
 import ColorList from "../../ColorList";
 
-import { AreaInfoProps, IArea } from "../../../types";
+import { AreaInfoProps, IArea } from "@types";
 
 export default function AreaInfo({ data, i }: AreaInfoProps) {
   const { t } = useTranslation();

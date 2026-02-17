@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { Tabs, TabPane, Divider, Tooltip, Button } from "@douyinfe/semi-ui";
 import { IconCode } from "@douyinfe/semi-icons";
-import { Tab } from "../../data/constants";
+import { Tab } from "@data/constants";
 import {
   useLayout,
   useSelect,
@@ -11,9 +11,9 @@ import {
   useEnums,
   useTypes,
   useTexts,
-} from "../../hooks";
+} from "@hooks";
 import { useTranslation } from "react-i18next";
-import { SidePanelProps } from "../../types";
+import { SidePanelProps } from "@types";
 import RelationshipsTab from "./RelationshipsTab/RelationshipsTab";
 import TypesTab from "./TypesTab/TypesTab";
 import Issues from "./Issues";
@@ -21,10 +21,10 @@ import AreasTab from "./AreasTab/AreasTab";
 import NotesTab from "./NotesTab/NotesTab";
 import TextsTab from "./TextsTab/TextsTab";
 import TablesTab from "./TablesTab/TablesTab";
-import { databases } from "../../data/databases";
+import { databases } from "@data/databases";
 import EnumsTab from "./EnumsTab/EnumsTab";
-import { isRtl } from "../../i18n/utils/rtl";
-import i18n from "../../i18n/i18n";
+import { isRtl } from "@i18n/utils/rtl";
+import i18n from "@i18n/i18n";
 import DBMLEditor from "./DBMLEditor";
 
 export default function SidePanel({ width, resize, setResize }: SidePanelProps) {
@@ -123,11 +123,13 @@ export default function SidePanel({ width, resize, setResize }: SidePanelProps) 
                 <>
                   <Divider layout="vertical" />
                   <Tooltip content={t("dbml_view")} position="bottom">
-                    <Button
-                      onClick={toggleDBMLEditor}
-                      icon={<IconCode />}
-                      theme="borderless"
-                    />
+                    <span>
+                      <Button
+                        onClick={toggleDBMLEditor}
+                        icon={<IconCode />}
+                        theme="borderless"
+                      />
+                    </span>
                   </Tooltip>
                 </>
               }

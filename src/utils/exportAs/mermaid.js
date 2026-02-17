@@ -1,6 +1,6 @@
-import { Cardinality } from "../../data/constants";
-import { dbToTypes } from "../../data/datatypes";
-import i18n from "../../i18n/i18n";
+import { Cardinality } from "@data/constants";
+import { dbToTypes } from "@data/datatypes";
+import i18n from "@i18n/i18n";
 
 export function jsonToMermaid(obj) {
   function getMermaidRelationship(relationship) {

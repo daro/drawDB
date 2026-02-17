@@ -5,8 +5,8 @@ import {
   IconAddNote, 
   IconAddText, 
   IconSupertype 
-} from "../../../icons";
-import { ObjectType } from "../../../data/constants";
+} from "@icons";
+import { ObjectType } from "@data/constants";
 
 interface ObjectToolbarProps {
   t: any;
@@ -41,6 +41,9 @@ export default function ObjectToolbar({
   tables,
   pointer,
 }: ObjectToolbarProps) {
+  const isMac = typeof window !== 'undefined' && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+  const modKey = isMac ? 'Cmd' : 'Ctrl';
+
   return (
     <>
       <Tooltip content={t("add_table")} position="bottom">
@@ -79,7 +82,7 @@ export default function ObjectToolbar({
           <IconAddText />
         </button>
       </Tooltip>
-      <Tooltip content="Assign supertype" position="bottom">
+      <Tooltip content={`${t("assign_supertype")} (${modKey} + Click)`} position="bottom">
         <button
           className={`py-1 px-2 hover-2 rounded-sm flex items-center disabled:opacity-50 ${linking && linkingLine.startFieldId === "" ? "text-blue-500" : ""}`}
           onClick={() => {

@@ -21,22 +21,26 @@ export default function HistoryControls({
   return (
     <>
       <Tooltip content={t("undo")} position="bottom">
-        <button
-          className="py-1 px-2 hover-2 rounded-sm flex items-center disabled:opacity-50"
-          disabled={undoStack.length === 0 || layout.readOnly}
-          onClick={undo}
-        >
-          <IconUndo size="large" />
-        </button>
+        <span>
+          <button
+            className="py-1 px-2 hover-2 rounded-sm flex items-center disabled:opacity-50"
+            disabled={undoStack.length === 0 || layout.readOnly}
+            onClick={undo}
+          >
+            <IconUndo size="large" />
+          </button>
+        </span>
       </Tooltip>
       <Tooltip content={t("redo")} position="bottom">
-        <button
-          className="py-1 px-2 hover-2 rounded-sm flex items-center disabled:opacity-50"
-          disabled={redoStack.length === 0 || layout.readOnly}
-          onClick={redo}
-        >
-          <IconRedo size="large" />
-        </button>
+        <span>
+          <button
+            className="py-1 px-2 hover-2 rounded-sm flex items-center disabled:opacity-50"
+            disabled={redoStack.length === 0 || layout.readOnly}
+            onClick={redo}
+          >
+            <IconRedo size="large" />
+          </button>
+        </span>
       </Tooltip>
     </>
   );

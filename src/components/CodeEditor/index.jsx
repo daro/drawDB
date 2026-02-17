@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Editor } from "@monaco-editor/react";
-import { useDiagram, useSettings } from "../../hooks";
+import { useDiagram, useSettings } from "@hooks";
 import { Button } from "@douyinfe/semi-ui";
 import { useTranslation } from "react-i18next";
 import { IconCopy, IconTick } from "@douyinfe/semi-icons";

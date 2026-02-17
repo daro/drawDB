@@ -1,7 +1,7 @@
 import { DateTime } from "luxon";
-import { MODAL, IMPORT_FROM, DB, Cardinality, State } from "../../../../data/constants";
-import { socials } from "../../../../data/socials";
-import { enterFullscreen, exitFullscreen } from "../../../../utils/fullscreen";
+import { MODAL, IMPORT_FROM, DB, Cardinality, State, SIDESHEET } from "@data/constants";
+import { socials } from "@data/socials";
+import { enterFullscreen, exitFullscreen } from "@utils/fullscreen";
 
 export const getMenuConfig = ({
   t,
@@ -53,6 +53,7 @@ export const getMenuConfig = ({
   fullscreen,
   setLayout,
   fitWindow,
+  setSidesheet,
 }) => ({
   file: {
     new: {
@@ -514,6 +515,10 @@ export const getMenuConfig = ({
     },
     report_bug: {
       function: () => window.open("/bug-report", "_blank"),
+    },
+    whats_new: {
+      name: t("whats_new"),
+      function: () => setSidesheet(SIDESHEET.HELP),
     },
   },
 });

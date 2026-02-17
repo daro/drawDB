@@ -1,9 +1,9 @@
-import { db } from "../../../data/db";
-import { useSettings } from "../../../hooks";
+import { db } from "@data/db";
+import { useSettings } from "@hooks";
 import { useLiveQuery } from "dexie-react-hooks";
 import Thumbnail from "../../Thumbnail";
 import { useTranslation } from "react-i18next";
-import { NewProps, IDiagram } from "../../../types";
+import { NewProps, IDiagram } from "@types";
 
 const emptyDiagram: IDiagram = {
   tables: [],

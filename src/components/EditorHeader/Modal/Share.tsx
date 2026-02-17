@@ -10,12 +10,12 @@ import {
   useNotes,
   useTransform,
   useTypes,
-} from "../../../hooks";
-import { databases } from "../../../data/databases";
-import { MODAL } from "../../../data/constants";
+} from "@hooks";
+import { databases } from "@data/databases";
+import { MODAL } from "@data/constants";
 import { create, patch, SHARE_FILENAME } from "../../../api/gists";
 
-import { ShareProps } from "../../../types";
+import { ShareProps } from "@types";
 
 export default function Share({ title, setModal }: ShareProps) {
   const { t } = useTranslation();

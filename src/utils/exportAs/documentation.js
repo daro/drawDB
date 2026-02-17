@@ -1,6 +1,6 @@
-import { dbToTypes } from "../../data/datatypes";
+import { dbToTypes } from "@data/datatypes";
 import { jsonToMermaid } from "./mermaid";
-import { databases } from "../../data/databases";
+import { databases } from "@data/databases";
 
 export function jsonToDocumentation(obj) {
   const documentationSummary = obj.tables

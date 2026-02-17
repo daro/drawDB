@@ -1,7 +1,7 @@
 import { Input } from "@douyinfe/semi-ui";
 import { useTranslation } from "react-i18next";
-import { useLayout } from "../../../hooks";
-import { RenameProps } from "../../../types";
+import { useLayout } from "@hooks";
+import { RenameProps } from "@types";
 
 export default function Rename({ title, setTitle }: RenameProps) {
   const { t } = useTranslation();

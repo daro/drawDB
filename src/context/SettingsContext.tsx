@@ -1,5 +1,5 @@
 import { createContext, useEffect, useState, ReactNode, Dispatch, SetStateAction } from "react";
-import { TABLE_CONFIG } from "../data/constants";
+import { TABLE_CONFIG } from "@data/constants";
 import { ISettings } from "../types/settings";
 
 const defaultSettings: ISettings = {
@@ -22,7 +22,7 @@ const defaultSettings: ISettings = {
   showPKIcons: false,
   showFKIcons: false,
   sideMargin: 20,
-  spreadRelations: false,
+  spreadRelations: true,
   tableColors: [...TABLE_CONFIG.DEFAULT_COLORS],
   outboundRelationsInTableColor: false,
   relationAnimationsInTableColor: false,

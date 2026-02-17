@@ -1,10 +1,13 @@
 import React, { useMemo } from "react";
-import { ObjectType } from "../../data/constants";
+import { ObjectType, Tab } from "@data/constants";
 import Table from "./Table";
 import Note from "./Note";
-import Text from "./Text";
-import Area from "./Area";
-import { ITable, IArea, INote, IText, IAreaResize, IAreaInitDimensions } from "../../types";
+import Text, { TextEditPopover, TextHeader } from "./Text";
+import { ITable, IArea, INote, IText, IAreaResize, IAreaInitDimensions } from "@types";
+import { CanvasObject } from "./common/CanvasObject";
+import { useTexts, useLayout } from "@hooks";
+import { getTextWidth } from "@utils/utils";
+import Area from "@components/EditorCanvas/Area";
 
 /**
  * Props for the ObjectsLayer component.
@@ -45,6 +48,9 @@ const ObjectsLayer: React.FC<ObjectsLayerProps> = ({
   setAreaResizeCallback,
   setAreaInitDimensionsCallback,
 }) => {
+  const { updateText, deleteText } = useTexts();
+  const { layout } = useLayout();
+
   const renderedAreas = useMemo(() => areas.map((a) => a && (
     <Area
       key={a.id}
@@ -63,22 +69,65 @@ const ObjectsLayer: React.FC<ObjectsLayerProps> = ({
     />
   )), [notes, setElementPointerDown]);
 
-  const renderedTables = useMemo(() => tables.map((table) => table && (
-    <Table
-      key={table.id}
-      tableData={table}
-      handleGripField={handleGripField}
-      onPointerDown={setElementPointerDown(table, ObjectType.TABLE)}
-    />
-  )), [tables, handleGripField, setElementPointerDown]);
+  const renderedTables = useMemo(() => {
+    const sortedTables = [...tables].sort((a, b) => {
+      if (!a || !b) return 0;
+      const aHasSuper = a.supertypeId !== null && a.supertypeId !== undefined;
+      const bHasSuper = b.supertypeId !== null && b.supertypeId !== undefined;
+      if (!aHasSuper && bHasSuper) return -1;
+      if (aHasSuper && !bHasSuper) return 1;
+      return 0;
+    });
 
-  const renderedTexts = useMemo(() => texts.map((t) => t && (
-    <Text
-      key={t.id}
-      data={t}
-      onPointerDown={setElementPointerDown(t, ObjectType.TEXT)}
-    />
-  )), [texts, setElementPointerDown]);
+    return sortedTables.map((table) => table && (
+      <Table
+        key={table.id}
+        tableData={table}
+        handleGripField={handleGripField}
+        onPointerDown={setElementPointerDown(table, ObjectType.TABLE)}
+      />
+    ));
+  }, [tables, handleGripField, setElementPointerDown]);
+
+  const renderedTexts = useMemo(() => texts.map((t) => {
+    if (!t) return null;
+    
+    const width = getTextWidth(t.text, `${t.fontWeight} ${t.fontSize}px sans-serif`);
+    
+    return (
+      <CanvasObject
+        key={t.id}
+        data={{
+          ...t, 
+          width: width, 
+          height: t.fontSize + 4,
+          x: t.x,
+          y: t.y - t.fontSize
+        }}
+        objectType={ObjectType.TEXT}
+        tab={Tab.TEXT}
+        scrollIdPrefix="scroll_text_"
+        updateCallback={updateText}
+        popoverContent={<TextEditPopover data={t} />}
+        showResizeHandles={false}
+        showRotationHandle={true}
+      >
+        {({ isSelected, isHovered, isOpen, edit }) => (
+          <>
+            <g onDoubleClick={edit} transform={`translate(${t.x}, ${t.y - t.fontSize})`}>
+              <Text
+                data={t}
+                onPointerDown={setElementPointerDown(t, ObjectType.TEXT)}
+              />
+              {(isSelected || (isHovered && !layout.readOnly)) && (
+                <TextHeader data={t} width={width} edit={edit} deleteText={deleteText} />
+              )}
+            </g>
+          </>
+        )}
+      </CanvasObject>
+    );
+  }), [texts, setElementPointerDown, updateText, layout.readOnly, deleteText]);
 
   return (
     <>

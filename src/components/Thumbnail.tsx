@@ -3,8 +3,8 @@ import {
   TABLE_CONFIG,
   NOTE_CONFIG,
   GRID_CONFIG,
-} from "../data/constants";
-import { ThumbnailProps } from "../types";
+} from "@data/constants";
+import { ThumbnailProps } from "@types";
 
 export default function Thumbnail({ diagram, i, zoom, theme }: ThumbnailProps) {
   return (

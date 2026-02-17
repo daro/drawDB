@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo, useRef } from "react";
-import { useDiagram, useEnums, useLayout } from "../../hooks";
-import { toDBML } from "../../utils/exportAs/dbml";
-import { fromDBML } from "../../utils/importFrom/dbml";
+import { useDiagram, useEnums, useLayout } from "@hooks";
+import { toDBML } from "@utils/exportAs/dbml";
+import { fromDBML } from "@utils/importFrom/dbml";
 import { Button, Tooltip } from "@douyinfe/semi-ui";
 import { IconTemplate } from "@douyinfe/semi-icons";
 import { useTranslation } from "react-i18next";

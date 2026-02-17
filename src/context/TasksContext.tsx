@@ -1,5 +1,5 @@
 import { createContext, useState, ReactNode, Dispatch, SetStateAction } from "react";
-import { ITodo } from "../types";
+import { ITodo } from "@types";
 
 interface TasksContextType {
   tasks: ITodo[];

@@ -1,4 +1,4 @@
-import { dbToTypes } from "../../data/datatypes";
+import { dbToTypes } from "@data/datatypes";
 import { parseDefault } from "./shared";
 
 export function toOracleSQL(diagram) {

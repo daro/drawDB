@@ -16,7 +16,7 @@ import {
   useSaveState,
   useUndoRedo,
   useSettings,
-} from "../../../hooks";
+} from "@hooks";
 import {
   Action,
   ObjectType,
@@ -25,15 +25,15 @@ import {
   tableHeaderHeight,
   tableColorStripHeight,
   tableFieldHeight,
-} from "../../../data/constants";
+} from "@data/constants";
 import TableField from "./TableField";
 import IndexDetails from "./IndexDetails";
 import { useTranslation } from "react-i18next";
 import { SortableList } from "../../SortableList/SortableList";
 import { nanoid } from "nanoid";
-import { getTableHeight } from "../../../utils/utils";
+import { getTableHeight } from "@utils/utils";
 import ColorList from "../../ColorList";
-import { TableInfoProps, ITable } from "../../../types";
+import { TableInfoProps, ITable } from "@types";
 
 export default function TableInfo({ data }: TableInfoProps) {
   const { tables, database } = useDiagram();

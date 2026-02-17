@@ -1,4 +1,4 @@
-import { DB } from "../../data/constants";
+import { DB } from "@data/constants";
 import { toMariaDB } from "./mariadb";
 import { toMSSQL } from "./mssql";
 import { toMySQL } from "./mysql";

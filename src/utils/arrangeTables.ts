@@ -1,4 +1,4 @@
-import { TABLE_CONFIG } from "../data/constants";
+import { TABLE_CONFIG } from "@data/constants";
 
 export function arrangeTables(diagram) {
   let maxHeight = -1;

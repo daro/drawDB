@@ -1,20 +1,20 @@
 import {
   ddbDiagramIsValid,
   jsonDiagramIsValid,
-} from "../../../utils/validateSchema";
-import { areFieldsCompatible, getTableHeight } from "../../../utils/utils";
+} from "@utils/validateSchema";
+import { areFieldsCompatible, getTableHeight } from "@utils/utils";
 import { Upload, Banner } from "@douyinfe/semi-ui";
-import { DB, IMPORT_FROM, STATUS, TABLE_CONFIG } from "../../../data/constants";
+import { DB, IMPORT_FROM, STATUS, TABLE_CONFIG } from "@data/constants";
 import {
   useAreas,
   useEnums,
   useNotes,
   useDiagram,
   useTypes,
-} from "../../../hooks";
+} from "@hooks";
 import { useTranslation } from "react-i18next";
-import { fromDBML } from "../../../utils/importFrom/dbml";
-import { ImportDiagramProps } from "../../../types";
+import { fromDBML } from "@utils/importFrom/dbml";
+import { ImportDiagramProps } from "@types";
 
 export default function ImportDiagram({
   setImportData,

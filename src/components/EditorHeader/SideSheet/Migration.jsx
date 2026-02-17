@@ -3,12 +3,12 @@ import { Tabs, TabPane, Modal, Input, Tag, Spin } from "@douyinfe/semi-ui";
 import { DiffEditor } from "@monaco-editor/react";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { useSettings } from "../../../hooks";
+import { useSettings } from "@hooks";
 import { compare, VERSION_FILENAME } from "../../../api/gists";
-import { deepDiff } from "../../../utils/diff";
+import { deepDiff } from "@utils/diff";
 import { DateTime } from "luxon";
 import CodeEditor from "../../CodeEditor";
-import { generateMigrationSQL } from "../../../utils/migrations/diffToSQL";
+import { generateMigrationSQL } from "@utils/migrations/diffToSQL";
 
 export default function Migration({
   gistId,

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Dispatch, SetStateAction } from "react";
 import {
   IconCaretdown,
   IconChevronUp,
@@ -7,7 +7,6 @@ import {
   IconRedo,
   IconSaveStroked,
   IconDeleteStroked,
-  IconRotationStroked,
 } from "@douyinfe/semi-icons";
 import {
   Divider,
@@ -20,7 +19,7 @@ import {
   ObjectType,
   SIDESHEET,
   Cardinality,
-} from "../../../../data/constants";
+} from "@data/constants";
 import {
   useLayout,
   useSettings,
@@ -29,7 +28,7 @@ import {
   useUndoRedo,
   useSelect,
   useCanvas,
-} from "../../../../hooks";
+} from "@hooks";
 import {
   IconAddArea,
   IconAddNote,
@@ -38,14 +37,16 @@ import {
   IconAddOrGroup,
   IconAddText,
   IconSupertype,
-} from "../../../../icons";
+  IconWaypoint,
+  IconDivider,
+} from "@icons";
 import LayoutDropdown from "../../LayoutDropdown";
 import { useTranslation } from "react-i18next";
-import { isRtl } from "../../../../i18n/utils/rtl";
+import { isRtl } from "@i18n/utils/rtl";
 
 interface ToolbarProps {
-  setModal: (modal: number) => void;
-  setSidesheet: (sidesheet: number) => void;
+  setModal: Dispatch<SetStateAction<number>>; // (modal: number) => void;
+  setSidesheet: Dispatch<SetStateAction<number>>; // (sidesheet: number) => void;
   undo: () => void;
   redo: () => void;
   save: () => void;
@@ -56,11 +57,9 @@ interface ToolbarProps {
   fitWindow: (zoom: number) => void;
   createXorGroup: () => void;
   createOrGroup: () => void;
-  rotateRelationshipName: () => void;
   del: () => void;
   isSingleXorGroupSelected: boolean;
   isSingleOrGroupSelected: boolean;
-  hasSelectedRelationships: boolean;
   convertXorToOr: (id: string | number) => void;
   convertOrToXor: (id: string | number) => void;
   relationshipOptions: any[];
@@ -81,11 +80,9 @@ export default function Toolbar({
   fitWindow,
   createXorGroup,
   createOrGroup,
-  rotateRelationshipName,
   del,
   isSingleXorGroupSelected,
   isSingleOrGroupSelected,
-  hasSelectedRelationships,
   convertXorToOr,
   convertOrToXor,
   relationshipOptions,
@@ -96,6 +93,10 @@ export default function Toolbar({
   const { layout, setLayout } = useLayout();
   const { setSettings } = useSettings();
   const { transform, setTransform } = useTransform();
+
+  const isMac = typeof window !== 'undefined' && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+  const modKey = isMac ? 'Cmd' : 'Ctrl';
+
   const {
     tables,
     linking,
@@ -104,6 +105,8 @@ export default function Toolbar({
     setLinkingLine,
     relationshipType,
     setRelationshipType,
+    waypointMode,
+    setWaypointMode,
   } = useDiagram();
   const { pointer } = useCanvas();
   const { undoStack, redoStack } = useUndoRedo();
@@ -263,7 +266,7 @@ export default function Toolbar({
             <IconAddText />
           </button>
         </Tooltip>
-        <Tooltip content="Assign supertype" position="bottom">
+        <Tooltip content={`${t("assign_supertype")} (${modKey} + Click)`} position="bottom">
           <button
             className={`py-1 px-2 hover-2 rounded-sm flex items-center disabled:opacity-50 ${linking && linkingLine.startFieldId === "" ? "text-blue-500" : ""}`}
             onClick={() => {
@@ -295,6 +298,25 @@ export default function Toolbar({
             disabled={layout.readOnly}
           >
             <IconSupertype />
+          </button>
+        </Tooltip>
+        <Divider layout="vertical" margin="8px" />
+        <Tooltip content={t("waypoint")} position="bottom">
+          <button
+            className={`py-1 px-2 hover-2 rounded-sm flex items-center disabled:opacity-50 ${waypointMode === "waypoint" ? "text-blue-500" : ""}`}
+            onClick={() => setWaypointMode("waypoint")}
+            disabled={layout.readOnly}
+          >
+            <IconWaypoint />
+          </button>
+        </Tooltip>
+        <Tooltip content={t("divider")} position="bottom">
+          <button
+            className={`py-1 px-2 hover-2 rounded-sm flex items-center disabled:opacity-50 ${waypointMode === "divider" ? "text-blue-500" : ""}`}
+            onClick={() => setWaypointMode("divider")}
+            disabled={layout.readOnly}
+          >
+            <IconDivider />
           </button>
         </Tooltip>
         <Divider layout="vertical" margin="8px" />
@@ -331,15 +353,6 @@ export default function Toolbar({
             </button>
           </Tooltip>
         )}
-        <Tooltip content={t("rotate")} position="bottom">
-          <button
-            className="py-1 px-2 hover-2 rounded-sm flex items-center disabled:opacity-50"
-            onClick={rotateRelationshipName}
-            disabled={layout.readOnly || !hasSelectedRelationships}
-          >
-            <IconRotationStroked />
-          </button>
-        </Tooltip>
         {(selectedElement.element !== ObjectType.NONE ||
           bulkSelectedElements.length > 0) && (
           <Tooltip content={t("delete")} position="bottom">

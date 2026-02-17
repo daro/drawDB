@@ -1,6 +1,6 @@
 import { PathArray } from "svg-path-commander";
-import { IPoint } from "../../../types";
-import { RelationshipData, PathOptions, DrawableNode } from "../types";
+import { IPoint } from "@types";
+import { RelationshipData, PathOptions, DrawableNode } from "@types";
 
 export type PathSectionType = 
   | 'start-bracket' 

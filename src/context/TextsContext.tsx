@@ -1,9 +1,9 @@
 import { createContext, useState, useCallback, ReactNode, Dispatch, SetStateAction } from "react";
-import { Action, ObjectType } from "../data/constants";
-import { useUndoRedo, useTransform, useSelect } from "../hooks";
+import { Action, ObjectType, GRID_CONFIG } from "@data/constants";
+import { useUndoRedo, useTransform, useSelect, useSettings } from "@hooks";
 import { Toast } from "@douyinfe/semi-ui";
 import { useTranslation } from "react-i18next";
-import { IText } from "../types";
+import { IText } from "@types";
 import { nanoid } from "nanoid";
 
 interface TextsContextType {
@@ -28,6 +28,7 @@ export default function TextsContextProvider({ children }: { children: ReactNode
   const { t } = useTranslation();
   const [texts, setTexts] = useState<IText[]>([]);
   const { transform } = useTransform();
+  const { settings } = useSettings();
   const { setUndoStack, setRedoStack } = useUndoRedo();
   const { selectedElement, setSelectedElement } = useSelect();
 
@@ -39,10 +40,16 @@ export default function TextsContextProvider({ children }: { children: ReactNode
         return temp;
       });
     } else {
+      let x = transform.pan.x;
+      let y = transform.pan.y;
+      if (settings.snapToGrid) {
+        x = Math.round(x / GRID_CONFIG.SIZE) * GRID_CONFIG.SIZE;
+        y = Math.round(y / GRID_CONFIG.SIZE) * GRID_CONFIG.SIZE;
+      }
       const newText: IText = {
         id: nanoid(),
-        x: transform.pan.x,
-        y: transform.pan.y,
+        x,
+        y,
         text: t("new_text") || "New Text",
         color: "#333333",
         fontSize: 16,

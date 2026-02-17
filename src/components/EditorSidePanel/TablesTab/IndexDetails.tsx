@@ -1,11 +1,11 @@
-import { Action, ObjectType } from "../../../data/constants";
+import { Action, ObjectType } from "@data/constants";
 import { Input, Button, Popover, Checkbox, Select } from "@douyinfe/semi-ui";
 import { IconMore, IconDeleteStroked } from "@douyinfe/semi-icons";
-import { useDiagram, useLayout, useUndoRedo } from "../../../hooks";
+import { useDiagram, useLayout, useUndoRedo } from "@hooks";
 import { useTranslation } from "react-i18next";
 import { useMemo, useState } from "react";
 
-import { IndexDetailsProps, ITable, IIndex } from "../../../types";
+import { IndexDetailsProps, ITable, IIndex } from "@types";
 
 export default function IndexDetails({ data, fields, iid, tid }: IndexDetailsProps) {
   const { t } = useTranslation();

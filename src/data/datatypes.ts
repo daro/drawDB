@@ -1,20 +1,20 @@
 import { DB } from "./constants";
-import { IDataTypes } from "../types";
-import { defaultTypes } from "./datatypes/generic";
-import { mysqlTypes } from "./datatypes/mysql";
-import { postgresTypes } from "./datatypes/postgres";
-import { sqliteTypes } from "./datatypes/sqlite";
-import { mssqlTypes } from "./datatypes/mssql";
-import { oraclesqlTypes } from "./datatypes/oracle";
-import { mariadbTypes } from "./datatypes/mariadb";
+import { IDataTypes } from "@types";
+import { defaultTypes } from "@data/datatypes/generic";
+import { mysqlTypes } from "@data/datatypes/mysql";
+import { postgresTypes } from "@data/datatypes/postgres";
+import { sqliteTypes } from "@data/datatypes/sqlite";
+import { mssqlTypes } from "@data/datatypes/mssql";
+import { oraclesqlTypes } from "@data/datatypes/oracle";
+import { mariadbTypes } from "@data/datatypes/mariadb";
 
-export { defaultTypes } from "./datatypes/generic";
-export { mysqlTypes } from "./datatypes/mysql";
-export { postgresTypes } from "./datatypes/postgres";
-export { sqliteTypes } from "./datatypes/sqlite";
-export { mssqlTypes } from "./datatypes/mssql";
-export { oraclesqlTypes } from "./datatypes/oracle";
-export { mariadbTypes } from "./datatypes/mariadb";
+export { defaultTypes } from "@data/datatypes/generic";
+export { mysqlTypes } from "@data/datatypes/mysql";
+export { postgresTypes } from "@data/datatypes/postgres";
+export { sqliteTypes } from "@data/datatypes/sqlite";
+export { mssqlTypes } from "@data/datatypes/mssql";
+export { oraclesqlTypes } from "@data/datatypes/oracle";
+export { mariadbTypes } from "@data/datatypes/mariadb";
 
 const dbToTypesBase: Record<string, IDataTypes> = {
   [DB.GENERIC]: defaultTypes,

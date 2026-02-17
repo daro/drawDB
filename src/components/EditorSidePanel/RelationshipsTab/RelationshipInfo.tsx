@@ -12,20 +12,19 @@ import {
   IconDeleteStroked,
   IconLoopTextStroked,
   IconMore,
-  IconRotationStroked,
 } from "@douyinfe/semi-icons";
 import {
   Cardinality,
   Constraint,
   Action,
   ObjectType,
-} from "../../../data/constants";
-import { useDiagram, useLayout, useUndoRedo, useSettings, useSelect } from "../../../hooks";
-import i18n from "../../../i18n/i18n";
+} from "@data/constants";
+import { useDiagram, useLayout, useUndoRedo, useSettings, useSelect } from "@hooks";
+import i18n from "@i18n/i18n";
 import { useTranslation } from "react-i18next";
 import { useMemo, useState } from "react";
-import { findClosestPoint } from "../../../utils/calcPath";
-import { toSnakeCase, getTableHeight } from "../../../utils/utils";
+import { findClosestPoint } from "@utils/calcPath";
+import { toSnakeCase, getTableHeight } from "@utils/utils";
 import { nanoid } from "nanoid";
 
 const columns = [
@@ -39,8 +38,8 @@ const columns = [
   },
 ];
 
-import { RelationshipInfoProps, IRelationship, IWaypoint } from "../../../types";
-import { useCanvas } from "../../../hooks";
+import { RelationshipInfoProps, IRelationship, IWaypoint } from "@types";
+import { useCanvas } from "@hooks";
 
 export default function RelationshipInfo({ data }: RelationshipInfoProps) {
   const { setUndoStack, setRedoStack } = useUndoRedo();
@@ -66,6 +65,10 @@ export default function RelationshipInfo({ data }: RelationshipInfoProps) {
   const isPartOfXorGroup = useMemo(() => {
     return xorGroups.find((g) => g.childRelationshipIds.includes(data.id));
   }, [xorGroups, data.id]);
+
+  const isOneToMany = data.cardinality === Cardinality.ONE_TO_MANY || data.cardinality === "one_to_many";
+  const isManyToOne = data.cardinality === Cardinality.MANY_TO_ONE || data.cardinality === "many_to_one";
+  const canHaveDivider = isOneToMany || isManyToOne;
 
   const isPartOfOrGroup = useMemo(() => {
     return orGroups.find((g) => g.childRelationshipIds.includes(data.id));
@@ -201,14 +204,14 @@ export default function RelationshipInfo({ data }: RelationshipInfoProps) {
     if (layout.readOnly) return;
     const val = parseFloat(value);
     if (isNaN(val)) return;
-    updateRelationship(data.id, { labelRatio: Math.min(1, Math.max(0, val)) });
+    updateRelationship(data.id, { labelRatio: Math.min(1, Math.max(0, val / 100)) });
   };
 
   const handleLabelRatioBlur = (e) => {
     if (layout.readOnly) return;
     const val = parseFloat(e.target.value);
     if (isNaN(val)) return;
-    const clamped = Math.min(1, Math.max(0, val));
+    const clamped = Math.min(1, Math.max(0, val / 100));
     if (clamped === (editField.labelRatio ?? 0.5)) return;
 
     setUndoStack((prev) => [
@@ -282,40 +285,58 @@ export default function RelationshipInfo({ data }: RelationshipInfoProps) {
     [data.waypoints]
   );
 
-  const updateDivider = (key, value) => {
+  const updateDividerRatio = (value) => {
     const dividerIndex = (data.waypoints || []).findIndex(wp => wp.mode === "divider");
     if (dividerIndex === -1) return;
 
     const newWaypoints = [...(data.waypoints || [])];
     const wp = newWaypoints[dividerIndex];
     const val = parseFloat(value) || 0;
+    const clampedRatio = Math.min(0.999, Math.max(0.001, val / 100));
 
     const path = document.querySelector(
       `g[data-rel-id="${data.id}"] path`,
     ) as SVGPathElement | null;
+
     if (path && typeof path.getTotalLength === "function") {
       try {
-        const closest = findClosestPoint(path, {
-          x: key === "x" ? val : wp.x,
-          y: key === "y" ? val : wp.y,
-        });
+        const pathLength = path.getTotalLength();
+        const point = path.getPointAtLength(clampedRatio * pathLength);
         newWaypoints[dividerIndex] = {
           ...wp,
-          x: closest.x,
-          y: closest.y,
-          pathRatio: closest.ratio,
+          x: point.x,
+          y: point.y,
+          pathRatio: clampedRatio,
         };
       } catch (e) {
-        newWaypoints[dividerIndex] = { ...wp, [key]: val } as IWaypoint;
+        newWaypoints[dividerIndex] = { ...wp, pathRatio: clampedRatio } as IWaypoint;
       }
     } else {
-      newWaypoints[dividerIndex] = { ...wp, [key]: val } as IWaypoint;
+      newWaypoints[dividerIndex] = { ...wp, pathRatio: clampedRatio } as IWaypoint;
     }
     updateRelationship(data.id, { waypoints: newWaypoints });
   };
 
   const removeWaypoint = (index) => {
-    const newWaypoints = (data.waypoints || []).filter((_, i) => i !== index);
+    const currentWaypoints = data.waypoints || [];
+    const newWaypoints = currentWaypoints.filter((_, i) => i !== index);
+
+    setUndoStack((prev) => [
+      ...prev,
+      {
+        action: Action.EDIT,
+        element: ObjectType.RELATIONSHIP,
+        rid: data.id,
+        undo: { waypoints: currentWaypoints },
+        redo: { waypoints: newWaypoints },
+        message: t("edit_relationship", {
+          refName: data.name,
+          extra: `[${t("delete_waypoint") || "Delete waypoint"}]`,
+        }),
+      },
+    ]);
+    setRedoStack([]);
+
     updateRelationship(data.id, { waypoints: newWaypoints });
   };
 
@@ -323,29 +344,53 @@ export default function RelationshipInfo({ data }: RelationshipInfoProps) {
     const path = document.querySelector(
       `g[data-rel-id="${data.id}"] path`,
     ) as SVGPathElement | null;
+    let newWaypoints: IWaypoint[] = [];
+    const currentWaypoints = data.waypoints || [];
+
     if (path && typeof path.getTotalLength === "function") {
       try {
         const closest = findClosestPoint(path, {
           x: pointer.spaces.diagram.x,
           y: pointer.spaces.diagram.y,
         });
-        const newWaypoints: IWaypoint[] = [
-          ...(data.waypoints || []),
+        newWaypoints = [
+          ...currentWaypoints,
           {
             x: closest.x,
             y: closest.y,
             mode: "waypoint" as const,
           },
         ];
-        updateRelationship(data.id, { waypoints: newWaypoints });
-      } catch (e) {}
+      } catch (e) {
+        newWaypoints = [
+          ...currentWaypoints,
+          { x: 100, y: 100, mode: "waypoint" as const },
+        ];
+      }
     } else {
-      const newWaypoints: IWaypoint[] = [
-        ...(data.waypoints || []),
+      newWaypoints = [
+        ...currentWaypoints,
         { x: 100, y: 100, mode: "waypoint" as const },
       ];
-      updateRelationship(data.id, { waypoints: newWaypoints });
     }
+
+    setUndoStack((prev) => [
+      ...prev,
+      {
+        action: Action.EDIT,
+        element: ObjectType.RELATIONSHIP,
+        rid: data.id,
+        undo: { waypoints: currentWaypoints },
+        redo: { waypoints: newWaypoints },
+        message: t("edit_relationship", {
+          refName: data.name,
+          extra: `[${t("add_waypoint")}]`,
+        }),
+      },
+    ]);
+    setRedoStack([]);
+
+    updateRelationship(data.id, { waypoints: newWaypoints });
   };
 
   const addDivider = () => {
@@ -422,7 +467,8 @@ export default function RelationshipInfo({ data }: RelationshipInfoProps) {
   };
 
   const updateWaypoint = (index, key, value) => {
-    const newWaypoints = (data.waypoints || []).map((wp, i) => {
+    const currentWaypoints = data.waypoints || [];
+    const newWaypoints = currentWaypoints.map((wp, i) => {
       if (i === index) {
         let updatedWp = {
           ...wp,
@@ -462,6 +508,25 @@ export default function RelationshipInfo({ data }: RelationshipInfoProps) {
       }
       return wp;
     });
+
+    if (key === "mode") {
+      setUndoStack((prev) => [
+        ...prev,
+        {
+          action: Action.EDIT,
+          element: ObjectType.RELATIONSHIP,
+          rid: data.id,
+          undo: { waypoints: currentWaypoints },
+          redo: { waypoints: newWaypoints },
+          message: t("edit_relationship", {
+            refName: data.name,
+            extra: `[${t("waypoint")}]`,
+          }),
+        },
+      ]);
+      setRedoStack([]);
+    }
+
     updateRelationship(data.id, { waypoints: newWaypoints as IWaypoint[] });
   };
 
@@ -764,14 +829,14 @@ export default function RelationshipInfo({ data }: RelationshipInfoProps) {
           <Col span={24}>
             <Input
               size="small"
-              prefix="Ratio"
-              value={data.labelRatio ?? 0.5}
+              prefix="Ratio %"
+              value={Math.round((data.labelRatio ?? 0.5) * 100)}
               type="number"
-              step={0.01}
+              step={1}
               min={0}
-              max={1}
+              max={100}
               onChange={(v) => updateLabelRatio(v)}
-              onFocus={(e) => setEditField({ ...editField, labelRatio: parseFloat(e.target.value) || 0.5 })}
+              onFocus={(e) => setEditField({ ...editField, labelRatio: parseFloat(e.target.value) / 100 || 0.5 })}
               onBlur={handleLabelRatioBlur}
               readOnly={layout.readOnly}
             />
@@ -805,14 +870,12 @@ export default function RelationshipInfo({ data }: RelationshipInfoProps) {
         </Row>
       </div>
 
-      {!settings.autoSplitRelationships && (
+      {canHaveDivider && (
         <div className="mt-4">
           <div className="flex justify-between items-center mb-2">
             <div className="font-semibold">{t("divider") || "Divider"}:</div>
             {dividerWp ? (
-              <Button size="small" type="danger" onClick={removeDivider} disabled={layout.readOnly}>
-                {t("delete") || "Delete"}
-              </Button>
+              <Button size="small" type="danger" icon={<IconDeleteStroked />} onClick={removeDivider} disabled={layout.readOnly} />
             ) : (
               <Button size="small" onClick={addDivider} disabled={layout.readOnly}>
                 {t("add") || "Add"}
@@ -821,23 +884,36 @@ export default function RelationshipInfo({ data }: RelationshipInfoProps) {
           </div>
           {dividerWp && (
             <Row gutter={4} className="mb-2 items-center">
-              <Col span={12}>
+              <Col span={24}>
                 <Input
                   size="small"
-                  prefix="X"
-                  value={dividerWp.x}
+                  prefix="Ratio %"
+                  value={Math.round((dividerWp.pathRatio ?? 0.5) * 100)}
                   type="number"
-                  onChange={(v) => updateDivider("x", v)}
-                  readOnly={layout.readOnly}
-                />
-              </Col>
-              <Col span={12}>
-                <Input
-                  size="small"
-                  prefix="Y"
-                  value={dividerWp.y}
-                  type="number"
-                  onChange={(v) => updateDivider("y", v)}
+                  step={1}
+                  min={0}
+                  max={100}
+                  onChange={(v) => updateDividerRatio(v)}
+                  onFocus={() => setEditField({ ...editField, waypoints: data.waypoints })}
+                  onBlur={(e) => {
+                    const oldRatio = Math.round(((editField.waypoints || []).find(wp => wp.mode === "divider")?.pathRatio ?? 0.5) * 100);
+                    if (parseInt(e.target.value) === oldRatio) return;
+                    setUndoStack((prev) => [
+                      ...prev,
+                      {
+                        action: Action.EDIT,
+                        element: ObjectType.RELATIONSHIP,
+                        rid: data.id,
+                        undo: { waypoints: editField.waypoints },
+                        redo: { waypoints: data.waypoints },
+                        message: t("edit_relationship", {
+                          refName: data.name,
+                          extra: `[${t("divider") || "Divider"} ratio]`,
+                        }),
+                      },
+                    ]);
+                    setRedoStack([]);
+                  }}
                   readOnly={layout.readOnly}
                 />
               </Col>
@@ -849,57 +925,56 @@ export default function RelationshipInfo({ data }: RelationshipInfoProps) {
       <div className="mt-4">
         <div className="flex justify-between items-center mb-2">
           <div className="font-semibold">{t("waypoints") || "Waypoints"}:</div>
-          <Button size="small" onClick={addWaypoint} disabled={layout.readOnly}>
-            {t("add") || "Add"}
-          </Button>
         </div>
-        {(data.waypoints || []).map((wp, i) => (
-          <div key={i} className="mb-2">
-            <Row gutter={4} className="items-center mb-1">
-              <Col span={10}>
-                <Input
-                  size="small"
-                  prefix="X"
-                  value={wp.x}
-                  type="number"
-                  onChange={(v) => updateWaypoint(i, "x", v)}
-                  readOnly={layout.readOnly}
-                />
-              </Col>
-              <Col span={10}>
-                <Input
-                  size="small"
-                  prefix="Y"
-                  value={wp.y}
-                  type="number"
-                  onChange={(v) => updateWaypoint(i, "y", v)}
-                  readOnly={layout.readOnly}
-                />
-              </Col>
-              <Col span={4}>
-                <Button
-                  type="danger"
-                  size="small"
-                  icon={<IconDeleteStroked />}
-                  onClick={() => removeWaypoint(i)}
-                  disabled={layout.readOnly}
-                />
-              </Col>
-            </Row>
-            <Select
-              size="small"
-              value={wp.mode || "waypoint"}
-              onChange={(v) => updateWaypoint(i, "mode", v)}
-              className="w-full"
-              optionList={[
-                { label: t("waypoint") || "Waypoint", value: "waypoint" },
-                { label: t("floating") || "Floating", value: "floating" },
-                { label: t("divider") || "Divider", value: "divider" },
-              ]}
-              disabled={layout.readOnly}
-            />
-          </div>
-        ))}
+        {(data.waypoints || [])
+          .map((wp, i) => ({ ...wp, originalIndex: i }))
+          .filter((wp) => wp.mode !== "divider")
+          .map((wp) => (
+            <div key={wp.originalIndex} className="mb-2">
+              <Row gutter={4} className="items-center mb-1">
+                <Col span={10}>
+                  <Input
+                    size="small"
+                    prefix="X"
+                    value={wp.x}
+                    type="number"
+                    onChange={(v) => updateWaypoint(wp.originalIndex, "x", v)}
+                    readOnly={layout.readOnly}
+                  />
+                </Col>
+                <Col span={10}>
+                  <Input
+                    size="small"
+                    prefix="Y"
+                    value={wp.y}
+                    type="number"
+                    onChange={(v) => updateWaypoint(wp.originalIndex, "y", v)}
+                    readOnly={layout.readOnly}
+                  />
+                </Col>
+                <Col span={4}>
+                  <Button
+                    type="danger"
+                    size="small"
+                    icon={<IconDeleteStroked />}
+                    onClick={() => removeWaypoint(wp.originalIndex)}
+                    disabled={layout.readOnly}
+                  />
+                </Col>
+              </Row>
+              <Select
+                size="small"
+                value={wp.mode || "waypoint"}
+                onChange={(v) => updateWaypoint(wp.originalIndex, "mode", v)}
+                className="w-full"
+                optionList={[
+                  { label: t("waypoint") || "Waypoint", value: "waypoint" },
+                  { label: t("floating") || "Floating", value: "floating" },
+                ]}
+                disabled={layout.readOnly}
+              />
+            </div>
+          ))}
       </div>
 
       <Row gutter={6} className="my-3">

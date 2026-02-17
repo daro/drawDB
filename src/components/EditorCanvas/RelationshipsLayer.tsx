@@ -1,9 +1,9 @@
 import React, { useMemo } from "react";
-import { ObjectType } from "../../data/constants";
+import { ObjectType } from "@data/constants";
 import Relationship from "./Relationship";
 import XorGroup from "./XorGroup";
 import OrGroup from "./OrGroup";
-import { IRelationship, IGroup } from "../../types";
+import { IRelationship, IGroup } from "@types";
 
 /**
  * Props for the RelationshipsLayer component.

@@ -2,14 +2,8 @@ import { useRef, useState, useCallback } from "react";
 import {
   ObjectType,
   THEME_CONFIG,
-} from "../../data/constants";
-import Table from "./Table";
-import Area from "./Area";
-import Relationship from "./Relationship";
-import XorGroup from "./XorGroup";
-import OrGroup from "./OrGroup";
-import Note from "./Note";
-import Text from "./Text";
+} from "@data/constants";
+
 import {
   useCanvas,
   useSettings,
@@ -22,17 +16,17 @@ import {
   useLayout,
   useSaveState,
   useTexts,
-  useCanvasPanning,
-  useBulkSelection,
-  useLinkingLogic,
-  useCanvasInteraction
-} from "../../hooks";
-import { IAreaResize, IAreaInitDimensions } from "../../types";
+} from "@hooks";
+import { useCanvasPanning } from "./Canvas/hooks/useCanvasPanning";
+import { useBulkSelection } from "./Canvas/hooks/useBulkSelection";
+import { useLinkingLogic } from "./Canvas/hooks/useLinkingLogic";
+import { useCanvasInteraction } from "./Canvas/hooks/useCanvasInteraction";
+import { IAreaResize, IAreaInitDimensions } from "@types";
 import { useTranslation } from "react-i18next";
-import { getDebugLogs } from "../../utils/debug";
+import { getDebugLogs } from "@utils/debug";
 import { useEventListener } from "usehooks-ts";
-import { getRectFromEndpoints } from "../../utils/rect";
-import { State, GRID_CONFIG } from "../../data/constants";
+import { getRectFromEndpoints } from "@utils/rect";
+import { State, GRID_CONFIG } from "@data/constants";
 import GridBackground from "./GridBackground";
 import LinkingLayer from "./LinkingLayer";
 import DebugOverlays from "./DebugOverlays";
@@ -115,7 +109,7 @@ export default function Canvas() {
     handlePointerMoveLinking
   } = useLinkingLogic(
     tables, setTables, updateTable, addRelationship, updateField, linking, setLinking, linkingLine, setLinkingLine,
-    hoveredTable, setHoveredTable, relationshipType, settings, setUndoStack, setRedoStack, pointer, t, database
+    hoveredTable, setHoveredTable, relationshipType, settings, setUndoStack, setRedoStack, pointer, t, database, relationships
   );
 
   const {
@@ -127,8 +121,29 @@ export default function Canvas() {
   } = useCanvasInteraction(
     pointer, selectedElement, setSelectedElement, bulkSelectedElements, setBulkSelectedElements, tables,
     updateTable, updateArea, updateNote, updateText, setUndoStack, setRedoStack, settings, layout, t,
-    startSelection, startPanning, isSameElement, GRID_CONFIG
+    startSelection, startPanning, isSameElement, GRID_CONFIG, areas, notes, texts, relationships,
+    xorGroups, orGroups
   );
+
+  useEventListener("element-select", (e: any) => {
+    const { id, type, event, isModifierPressed } = e.detail;
+    console.log("[Canvas] element-select event received:", { id, type, isModifierPressed });
+    console.log("[Canvas] Current bulkSelectedElements:", bulkSelectedElements);
+    
+    // We override ctrlKey and metaKey if isModifierPressed is true
+    // this ensures that central logic knows if it should toggle selection
+    const modifiedEvent = new Proxy(event, {
+      get(target, prop) {
+        console.log("[Canvas] get(target, prop) ", prop);
+        if (prop === 'ctrlKey' || prop === 'metaKey') {
+          return isModifierPressed;
+        }
+        return (target as any)[prop];
+      }
+    });
+    console.log("[Canvas] modifiedEvent ", modifiedEvent);
+    handlePointerDownOnElement(modifiedEvent as any, { id, type });
+  });
 
   const [areaResize, setAreaResize] = useState<IAreaResize>({ id: "", dir: "none" });
   const [areaInitDimensions, setAreaInitDimensions] = useState<IAreaInitDimensions>({
@@ -202,9 +217,10 @@ export default function Canvas() {
     }
 
     if (isMouseLeftButton) {
-      startSelection(e);
       if (elementPointerDown.current !== null) {
         handlePointerDownOnElement(e, elementPointerDown.current);
+      } else {
+        startSelection(e);
       }
       pointer.setStyle("crosshair");
     } else if (isMouseMiddleButton) {

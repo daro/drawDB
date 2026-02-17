@@ -1,6 +1,6 @@
 import { Button, Collapse } from "@douyinfe/semi-ui";
 import { IconPlus } from "@douyinfe/semi-icons";
-import { useLayout, useNotes, useSelect } from "../../../hooks";
+import { useLayout, useNotes, useSelect } from "@hooks";
 import Empty from "../Empty";
 import SearchBar from "./SearchBar";
 import NoteInfo from "./NoteInfo";

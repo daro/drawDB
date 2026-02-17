@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Dropdown, Tag, Popconfirm } from "@douyinfe/semi-ui";
 import { IconCaretdown, IconChevronRight } from "@douyinfe/semi-icons";
-import { isRtl } from "../../../i18n/utils/rtl";
+import { isRtl } from "@i18n/utils/rtl";
 import icon from "../../../assets/icon_dark_64.png";
 
 interface MainMenuProps {

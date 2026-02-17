@@ -1,5 +1,5 @@
-import { useSettings } from "../../../hooks";
-import { languages } from "../../../i18n/i18n";
+import { useSettings } from "@hooks";
+import { languages } from "@i18n/i18n";
 
 export default function Language({ language, setLanguage }) {
   const { settings } = useSettings();

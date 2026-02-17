@@ -1,4 +1,4 @@
-import { useTransform } from "../hooks";
+import { useTransform } from "@hooks";
 import { createContext, useCallback, useMemo, useRef, useState, ReactNode } from "react";
 import { useEventListener, useResizeObserver } from "usehooks-ts";
 

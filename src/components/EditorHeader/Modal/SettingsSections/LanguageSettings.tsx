@@ -1,6 +1,6 @@
 import { Typography } from "@douyinfe/semi-ui";
 import { useTranslation } from "react-i18next";
-import { languages } from "../../../../i18n/i18n";
+import { languages } from "@i18n/i18n";
 
 const { Title } = Typography;
 

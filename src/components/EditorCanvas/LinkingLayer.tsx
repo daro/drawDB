@@ -1,5 +1,6 @@
 import React from "react";
-import { ITable } from "../../types";
+import { ITable } from "@types";
+import { IconSimilarity } from "@douyinfe/semi-icons";
 
 interface LinkingLayerProps {
   linking: boolean;
@@ -49,14 +50,25 @@ const LinkingLayer: React.FC<LinkingLayerProps> = ({
           );
           if (!startTable) return null;
           return (
-            <path
-              d={`M ${startTable.x + startTable.width / 2} ${
-                startTable.y + (startTable.height || 0) / 2
-              } L ${pointer.spaces.diagram.x} ${pointer.spaces.diagram.y}`}
-              stroke="#0084d1"
-              strokeWidth="2"
-              strokeDasharray="4"
-            />
+            <g>
+              <path
+                d={`M ${startTable.x + startTable.width / 2} ${
+                  startTable.y + (startTable.height || 0) / 2
+                } L ${pointer.spaces.diagram.x} ${pointer.spaces.diagram.y}`}
+                stroke="#0084d1"
+                strokeWidth="2"
+                strokeDasharray="4"
+              />
+              <g
+                transform={`translate(${pointer.spaces.diagram.x - 12}, ${
+                  pointer.spaces.diagram.y - 12
+                })`}
+              >
+                <IconSimilarity
+                  style={{ color: "#0084d1", fontSize: "24px" }}
+                />
+              </g>
+            </g>
           );
         })()
       )}

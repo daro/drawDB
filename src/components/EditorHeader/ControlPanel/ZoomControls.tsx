@@ -1,5 +1,5 @@
 import { Tooltip, Dropdown, InputNumber, Divider } from "@douyinfe/semi-ui";
-import { isRtl } from "../../../i18n/utils/rtl";
+import { isRtl } from "@i18n/utils/rtl";
 
 interface ZoomControlsProps {
   t: any;
@@ -17,14 +17,16 @@ export default function ZoomControls({
   return (
     <>
       <Tooltip content={t("zoom_out")} position="bottom">
-        <button
-          className="py-1 px-2 hover-2 rounded-sm text-lg"
-          onClick={() =>
-            setTransform((prev: any) => ({ ...prev, zoom: prev.zoom / 1.2 }))
-          }
-        >
-          <i className="fa-solid fa-magnifying-glass-minus" />
-        </button>
+        <span>
+          <button
+            className="py-1 px-2 hover-2 rounded-sm text-lg"
+            onClick={() =>
+              setTransform((prev: any) => ({ ...prev, zoom: prev.zoom / 1.2 }))
+            }
+          >
+            <i className="fa-solid fa-magnifying-glass-minus" />
+          </button>
+        </span>
       </Tooltip>
       <Dropdown
         style={{ width: "240px" }}
@@ -71,28 +73,34 @@ export default function ZoomControls({
         }
         trigger="click"
       >
-        <button className="py-1 px-2 hover-2 rounded-sm text-lg">
-          <i className="fa-solid fa-magnifying-glass" />
-        </button>
+        <span>
+          <button className="py-1 px-2 hover-2 rounded-sm text-lg">
+            <i className="fa-solid fa-magnifying-glass" />
+          </button>
+        </span>
       </Dropdown>
       <Tooltip content={t("zoom_in")} position="bottom">
-        <button
-          className="py-1 px-2 hover-2 rounded-sm text-lg"
-          onClick={() =>
-            setTransform((prev: any) => ({ ...prev, zoom: prev.zoom * 1.2 }))
-          }
-        >
-          <i className="fa-solid fa-magnifying-glass-plus" />
-        </button>
+        <span>
+          <button
+            className="py-1 px-2 hover-2 rounded-sm text-lg"
+            onClick={() =>
+              setTransform((prev: any) => ({ ...prev, zoom: prev.zoom * 1.2 }))
+            }
+          >
+            <i className="fa-solid fa-magnifying-glass-plus" />
+          </button>
+        </span>
       </Tooltip>
       <Divider layout="vertical" margin="8px" />
       <Tooltip content={t("fit_window_reset")} position="bottom">
-        <button
-          className="py-1 px-2 hover-2 rounded-sm text-lg"
-          onClick={() => fitWindow(100)}
-        >
-          <i className="fa-solid fa-expand" />
-        </button>
+        <span>
+          <button
+            className="py-1 px-2 hover-2 rounded-sm text-lg"
+            onClick={() => fitWindow(100)}
+          >
+            <i className="fa-solid fa-expand" />
+          </button>
+        </span>
       </Tooltip>
     </>
   );

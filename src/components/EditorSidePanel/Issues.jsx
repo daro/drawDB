@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Collapse, Badge } from "@douyinfe/semi-ui";
-import { arrayIsEqual } from "../../utils/utils";
-import { getIssues } from "../../utils/issues";
-import { useEnums, useSettings, useDiagram, useTypes } from "../../hooks";
+import { arrayIsEqual } from "@utils/utils";
+import { getIssues } from "@utils/issues";
+import { useEnums, useSettings, useDiagram, useTypes } from "@hooks";
 import { useTranslation } from "react-i18next";
 
 export default function Issues() {

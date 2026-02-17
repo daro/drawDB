@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import logo from "../assets/logo_light_160.png";
 import { SideSheet } from "@douyinfe/semi-ui";
 import { IconMenu } from "@douyinfe/semi-icons";
-import { socials } from "../data/socials";
+import { socials } from "@data/socials";
 
 export default function Navbar({ mode = "light" }) {
   const [openMenu, setOpenMenu] = useState(false);

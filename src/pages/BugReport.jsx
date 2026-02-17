@@ -3,16 +3,16 @@ import logo_light from "../assets/logo_light_160.png";
 import logo_dark from "../assets/logo_dark_160.png";
 import { Banner, Button, Input, Upload, Toast, Spin } from "@douyinfe/semi-ui";
 import { IconGithubLogo, IconPaperclip } from "@douyinfe/semi-icons";
-import RichEditor from "../components/LexicalEditor/RichEditor";
+import RichEditor from "@components/LexicalEditor/RichEditor";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
-import { editorConfig } from "../data/editorConfig";
+import { editorConfig } from "@data/editorConfig";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { $generateHtmlFromNodes } from "@lexical/html";
 import { CLEAR_EDITOR_COMMAND } from "lexical";
 import { Link } from "react-router-dom";
-import { socials } from "../data/socials";
-import { send } from "../api/email";
-import { useSettings, useThemedPage } from "../hooks";
+import { socials } from "@data/socials";
+import { send } from "@/api/email";
+import { useSettings, useThemedPage } from "@hooks";
 
 function Form({ theme }) {
   const [editor] = useLexicalComposerContext();

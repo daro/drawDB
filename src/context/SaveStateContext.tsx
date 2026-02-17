@@ -1,5 +1,5 @@
 import { createContext, useState, ReactNode, Dispatch, SetStateAction } from "react";
-import { State } from "../data/constants";
+import { State } from "@data/constants";
 
 interface SaveStateContextType {
   saveState: number;

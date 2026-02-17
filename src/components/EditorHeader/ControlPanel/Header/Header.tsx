@@ -13,13 +13,13 @@ import {
 import { useTranslation } from "react-i18next";
 import {
   MODAL,
-} from "../../../../data/constants";
+} from "@data/constants";
 import {
   useLayout,
   useDiagram,
-} from "../../../../hooks";
-import { databases } from "../../../../data/databases";
-import { isRtl } from "../../../../i18n/utils/rtl";
+} from "@hooks";
+import { databases } from "@data/databases";
+import { isRtl } from "@i18n/utils/rtl";
 import icon from "../../../../assets/icon_dark_64.png";
 import { Button } from "@douyinfe/semi-ui";
 
@@ -27,7 +27,7 @@ interface HeaderProps {
   title: string;
   version?: string;
   modal: number;
-  setModal: (modal: number) => void;
+  setModal:any; //(modal: number) => void;
   showEditName: boolean;
   setShowEditName: (show: boolean) => void;
   menu: any;

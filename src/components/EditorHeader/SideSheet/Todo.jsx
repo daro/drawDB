@@ -19,8 +19,8 @@ import {
   IconDeleteStroked,
   IconCaretdown,
 } from "@douyinfe/semi-icons";
-import { State } from "../../../data/constants";
-import { useTasks, useSaveState } from "../../../hooks";
+import { State } from "@data/constants";
+import { useTasks, useSaveState } from "@hooks";
 import { useTranslation } from "react-i18next";
 
 const Priority = {

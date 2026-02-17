@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAreas } from "../../../hooks";
+import { useAreas } from "@hooks";
 import { AutoComplete } from "@douyinfe/semi-ui";
 import { IconSearch } from "@douyinfe/semi-icons";
 import { useTranslation } from "react-i18next";

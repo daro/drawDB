@@ -1,6 +1,6 @@
 // @ts-nocheck
 import SVGPathCommander, { PathArray } from "svg-path-commander";
-import { TABLE_CONFIG } from "../data/constants";
+import { TABLE_CONFIG } from "@data/constants";
 
 export function calcGroupPoints(data, tables, relationships) {
   const parentTable = tables.find((t) => t.id === data.parentTableId);

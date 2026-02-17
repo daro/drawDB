@@ -1,4 +1,4 @@
-import { useSettings, useLayout } from "../hooks";
+import { useSettings, useLayout } from "@hooks";
 
 /**
  * Props for the ColorList component.

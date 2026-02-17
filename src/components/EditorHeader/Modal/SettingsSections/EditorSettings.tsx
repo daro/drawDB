@@ -25,19 +25,31 @@ export default function EditorSettings({
         {(t as any)("editor_settings")}
       </Title>
       <div className="space-y-1">
-        <SettingItem id="setting_strict_mode" label={(t as any)("strict_mode")}>
+        <SettingItem 
+          id="setting_strict_mode" 
+          label={(t as any)("strict_mode")}
+          tooltip={(t as any)("strict_mode_info")}
+        >
           <Switch
-            checked={settings.strictMode}
+            checked={settings.strictMode as boolean}
             onChange={() => invertSettings("strictMode")}
           />
         </SettingItem>
-        <SettingItem id="setting_show_grid" label={(t as any)("show_grid")}>
+        <SettingItem 
+          id="setting_show_grid" 
+          label={(t as any)("show_grid")}
+          tooltip={(t as any)("show_grid_info")}
+        >
           <Switch
-            checked={settings.showGrid}
+            checked={settings.showGrid as boolean}
             onChange={() => invertSettings("showGrid")}
           />
         </SettingItem>
-        <SettingItem id="setting_snap_to_grid" label={(t as any)("snap_to_grid")}>
+        <SettingItem 
+          id="setting_snap_to_grid" 
+          label={(t as any)("snap_to_grid")}
+          tooltip={(t as any)("snap_to_grid_info")}
+        >
           <Switch
             checked={settings.snapToGrid as boolean}
             onChange={() => invertSettings("snapToGrid")}

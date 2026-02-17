@@ -1,5 +1,5 @@
 import { escapeQuotes, exportFieldComment, parseDefault } from "./shared";
-import { dbToTypes } from "../../data/datatypes";
+import { dbToTypes } from "@data/datatypes";
 
 export function toPostgres(diagram) {
   const enumStatements = diagram.enums

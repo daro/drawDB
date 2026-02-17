@@ -1,5 +1,5 @@
 import { useMemo, useState, ReactNode } from "react";
-import { Action, ObjectType } from "../../../data/constants";
+import { Action, ObjectType } from "@data/constants";
 import { Input, Button, Popover, Select } from "@douyinfe/semi-ui";
 import { IconMore, IconKeyStroked } from "@douyinfe/semi-icons";
 import {
@@ -8,12 +8,12 @@ import {
   useTypes,
   useUndoRedo,
   useLayout,
-} from "../../../hooks";
+} from "@hooks";
 import { useTranslation } from "react-i18next";
-import { dbToTypes } from "../../../data/datatypes";
+import { dbToTypes } from "@data/datatypes";
 import { DragHandle } from "../../SortableList/DragHandle";
 import FieldDetails from "./FieldDetails";
-import { IField, ITable, TableFieldProps } from "../../../types";
+import { IField, ITable, TableFieldProps } from "@types";
 
 /**
  * A component representing a single field in the table info panel.

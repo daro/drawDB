@@ -1,5 +1,5 @@
-import { strHasQuotes } from "../../utils/utils";
-import { IField } from "../../types";
+import { strHasQuotes } from "@utils/utils";
+import { IField } from "@types";
 
 export const intRegex = /^-?\d*$/;
 export const doubleRegex = /^-?\d*.?\d+$/;

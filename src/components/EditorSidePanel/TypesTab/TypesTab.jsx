@@ -1,7 +1,7 @@
 import { Collapse, Button, Popover } from "@douyinfe/semi-ui";
 import { IconPlus, IconInfoCircle } from "@douyinfe/semi-icons";
-import { useSelect, useDiagram, useTypes, useLayout } from "../../../hooks";
-import { DB, ObjectType } from "../../../data/constants";
+import { useSelect, useDiagram, useTypes, useLayout } from "@hooks";
+import { DB, ObjectType } from "@data/constants";
 import Searchbar from "./SearchBar";
 import Empty from "../Empty";
 import TypeInfo from "./TypeInfo";

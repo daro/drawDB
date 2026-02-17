@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { AutoComplete } from "@douyinfe/semi-ui";
 import { IconSearch } from "@douyinfe/semi-icons";
-import { useEnums } from "../../../hooks";
+import { useEnums } from "@hooks";
 import { useTranslation } from "react-i18next";
 
 export default function SearchBar() {

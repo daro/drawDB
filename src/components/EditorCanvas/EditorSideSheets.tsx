@@ -1,7 +1,7 @@
 import React from "react";
 import { SideSheet } from "@douyinfe/semi-ui";
 import { useTranslation } from "react-i18next";
-import { ObjectType } from "../../data/constants";
+import { ObjectType } from "@data/constants";
 import XorGroupInfo from "../EditorSidePanel/RelationshipsTab/XorGroupInfo";
 import OrGroupInfo from "../EditorSidePanel/RelationshipsTab/OrGroupInfo";
 

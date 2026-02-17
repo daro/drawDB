@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import SimpleCanvas from "../components/SimpleCanvas";
-import Navbar from "../components/Navbar";
+import SimpleCanvas from "@components/SimpleCanvas";
+import Navbar from "@components/Navbar";
 import { template5 } from "../templates/template5";
 import mysql_icon from "../assets/mysql.png";
 import postgres_icon from "../assets/postgres.png";
@@ -13,8 +13,8 @@ import github from "../assets/github.png";
 import screenshot from "../assets/screenshot.png";
 import FadeIn from "../animations/FadeIn";
 import axios from "axios";
-import { languages } from "../i18n/i18n";
-import { socials } from "../data/socials";
+import { languages } from "@i18n/i18n";
+import { socials } from "@data/socials";
 import sympleCanvasDiagram from "../templates/sympleCanvas.json";
 
 function shortenNumber(number) {

@@ -28,60 +28,67 @@ export default function DiagramDisplay({
         <SettingItem
           id="setting_show_datatype"
           label={(t as any)("show_datatype")}
+          tooltip={(t as any)("show_datatype_info")}
         >
           <Switch
-            checked={settings.showDataTypes}
+            checked={settings.showDataTypes as boolean}
             onChange={() => invertSettings("showDataTypes")}
           />
         </SettingItem>
         <SettingItem
           id="setting_show_cardinality"
           label={(t as any)("show_cardinality")}
+          tooltip={(t as any)("show_cardinality_info")}
         >
           <Switch
-            checked={settings.showCardinality}
+            checked={settings.showCardinality as boolean}
             onChange={() => invertSettings("showCardinality")}
           />
         </SettingItem>
         <SettingItem
           id="setting_show_pk_icons"
           label={(t as any)("show_pk_icons")}
+          tooltip={(t as any)("show_pk_icons_info")}
         >
           <Switch
-            checked={settings.showPKIcons}
+            checked={settings.showPKIcons as boolean}
             onChange={() => invertSettings("showPKIcons")}
           />
         </SettingItem>
         <SettingItem
           id="setting_show_fk_icons"
           label={(t as any)("show_fk_icons")}
+          tooltip={(t as any)("show_fk_icons_info")}
         >
           <Switch
-            checked={settings.showFKIcons}
+            checked={settings.showFKIcons as boolean}
             onChange={() => invertSettings("showFKIcons")}
           />
         </SettingItem>
         <SettingItem
           id="setting_field_details"
           label={(t as any)("field_details")}
+          tooltip={(t as any)("field_details_info")}
         >
           <Switch
-            checked={settings.showFieldSummary}
+            checked={settings.showFieldSummary as boolean}
             onChange={viewFieldSummary}
           />
         </SettingItem>
         <SettingItem
           id="setting_table_names_uppercase"
           label={(t as any)("table_names_uppercase")}
+          tooltip={(t as any)("table_names_uppercase_info")}
         >
           <Switch
-            checked={settings.tableNamesUppercase}
+            checked={settings.tableNamesUppercase as boolean}
             onChange={() => invertSettings("tableNamesUppercase")}
           />
         </SettingItem>
         <SettingItem
           id="setting_show_relationship_labels"
           label={(t as any)("show_relationship_labels")}
+          tooltip={(t as any)("show_relationship_labels_info")}
         >
           <Switch
             checked={settings.showRelationshipLabels as boolean}
@@ -91,6 +98,7 @@ export default function DiagramDisplay({
         <SettingItem
           id="setting_show_relationship_names"
           label={(t as any)("show_relationship_names")}
+          tooltip={(t as any)("show_relationship_names_info")}
         >
           <Switch
             checked={settings.showRelationshipNames as boolean}
@@ -100,6 +108,7 @@ export default function DiagramDisplay({
         <SettingItem
           id="setting_rename_fk"
           label={(t as any)("rename_fk")}
+          tooltip={(t as any)("rename_fk_info")}
         >
           <Switch
             checked={settings.renameFK as boolean}
@@ -109,6 +118,7 @@ export default function DiagramDisplay({
         <SettingItem
           id="setting_spread_relations"
           label={(t as any)("spread_relations")}
+          tooltip={(t as any)("spread_relations_info")}
         >
           <Switch
             checked={settings.spreadRelations as boolean}
@@ -140,9 +150,10 @@ export default function DiagramDisplay({
         <SettingItem
           id="setting_side_margin"
           label={(t as any)("side_margin")}
+          tooltip={(t as any)("side_margin_info")}
         >
           <InputNumber
-            value={settings.sideMargin}
+            value={settings.sideMargin as number}
             style={{ width: 140 }}
             onChange={(v) =>
               setSettings((prev: any) => ({

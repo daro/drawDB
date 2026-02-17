@@ -8,9 +8,9 @@ import {
 import { saveAs } from "file-saver";
 import { useContext, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { DB, MODAL, STATUS, State } from "../../../data/constants";
-import { databases } from "../../../data/databases";
-import { db } from "../../../data/db";
+import { DB, MODAL, STATUS, State, DBType } from "@data/constants";
+import { databases } from "@data/databases";
+import { db } from "@data/db";
 import {
   useAreas,
   useDiagram,
@@ -23,15 +23,15 @@ import {
   useUndoRedo,
   useTexts,
   useSettings,
-} from "../../../hooks";
-import { isRtl } from "../../../i18n/utils/rtl";
-import { importSQL } from "../../../utils/importSQL";
+} from "@hooks";
+import { isRtl } from "@i18n/utils/rtl";
+import { importSQL } from "@utils/importSQL";
 import {
   getModalTitle,
   getModalWidth,
   getOkText,
-} from "../../../utils/modalData";
-import CodeEditor from "../../CodeEditor";
+} from "@utils/modalData";
+import CodeEditor from "@components/CodeEditor";
 import ImportDiagram from "./ImportDiagram";
 import ImportSource from "./ImportSource";
 import Language from "./Language";
@@ -43,9 +43,9 @@ import SetSideMargin from "./SetSideMargin";
 import SetTableColors from "./SetTableColors";
 import Share from "./Share";
 import Settings from "./Settings";
-import { IdContext } from "../../Workspace";
+import { IdContext } from "@components/Workspace";
 import { nanoid } from "nanoid";
-import { ModalProps } from "../../../types";
+import { IImportData, ModalProps } from "@types";
 
 const extensionToLanguage = {
   md: "markdown",
@@ -95,21 +95,22 @@ export default function Modal({
     src: "",
     overwrite: false,
   });
-  const [importData, setImportData] = useState(null);
-  const [error, setError] = useState({
+  const [importData, setImportData] = useState<IImportData | null>(null);
+  const [error, setError] = useState<{ type: number; message: string }>({
     type: STATUS.NONE,
     message: "",
   });
   const [selectedTemplateId, setSelectedTemplateId] = useState(-1);
-  const [selectedDiagramId, setSelectedDiagramId] = useState(0);
+  const [selectedDiagramId, setSelectedDiagramId] = useState<string | number>(0);
   const [saveAsTitle, setSaveAsTitle] = useState(title);
 
   const overwriteDiagram = () => {
-    setTables(importData.tables);
-    setRelationships(importData.relationships);
+    if (!importData) return;
+    setTables(importData.tables ?? []);
+    setRelationships(importData.relationships ?? []);
     setXorGroups(importData.xorGroups ?? []);
     setOrGroups(importData.orGroups ?? []);
-    setAreas(importData.subjectAreas ?? []);
+    setAreas(importData.areas ?? importData.subjectAreas ?? []);
     setNotes(importData.notes ?? []);
     setTexts(importData.texts ?? []);
     setTasks(importData.todos ?? []);
@@ -124,17 +125,17 @@ export default function Modal({
     }
   };
 
-  const loadDiagram = async (id) => {
-    await (db as any).diagrams
-      .get(id)
+  const loadDiagram = async (id: string | number) => {
+    await db.diagrams
+      .get(id as number)
       .then((diagram) => {
         if (diagram) {
-          if (diagram.database) {
-            setDatabase(diagram.database);
+          if (diagram.database && diagram.database in databases) {
+            setDatabase(diagram.database as DBType);
           } else {
             setDatabase(DB.GENERIC);
           }
-          setDiagramId(diagram.id);
+          setDiagramId(diagram.id as number);
           setTitle(diagram.name);
           setTables(diagram.tables);
           setRelationships(diagram.references);
@@ -150,7 +151,7 @@ export default function Modal({
           });
           setUndoStack([]);
           setRedoStack([]);
-          if (databases[diagram.database].hasTypes) {
+          if (databases[diagram.database].hasTypes && diagram.types) {
             setTypes(
               diagram.types.map((t) =>
                 t.id
@@ -165,7 +166,7 @@ export default function Modal({
               ),
             );
           }
-          if (databases[diagram.database].hasEnums) {
+          if (databases[diagram.database].hasEnums && diagram.enums) {
             setEnums(
               diagram.enums.map((e) => (!e.id ? { ...e, id: nanoid() } : e)) ??
                 [],
@@ -216,8 +217,8 @@ export default function Modal({
     try {
       const diagramData = importSQL(
         ast,
-        database === DB.GENERIC ? importDb : database,
-        database,
+        (database === DB.GENERIC ? importDb : database) as DBType,
+        database as DBType,
       );
 
       if (importSource.overwrite) {
@@ -256,9 +257,11 @@ export default function Modal({
     }
   };
 
-  const createNewDiagram = (id) => {
+  const createNewDiagram = (id: number) => {
     const newWindow = window.open("/editor");
-    newWindow.name = "lt " + id;
+    if (newWindow) {
+      newWindow.name = "lt " + id;
+    }
   };
 
   const getModalOnOk = async () => {
@@ -287,11 +290,11 @@ export default function Modal({
         }
         return;
       case MODAL.IMPORT_SRC:
-        parseSQLAndLoadDiagram();
+        await parseSQLAndLoadDiagram();
         return;
       case MODAL.OPEN:
         if (selectedDiagramId === 0) return;
-        loadDiagram(selectedDiagramId);
+        await loadDiagram(selectedDiagramId);
         setModal(MODAL.NONE);
         return;
       case MODAL.RENAME:
@@ -351,7 +354,7 @@ export default function Modal({
         return (
           <Open
             selectedDiagramId={selectedDiagramId}
-            setSelectedDiagramId={(id: any) => setSelectedDiagramId(id)}
+            setSelectedDiagramId={(id: string | number) => setSelectedDiagramId(id)}
           />
         );
       case MODAL.SAVEAS:
@@ -371,12 +374,11 @@ export default function Modal({
                 <Image src={exportData.data} alt="Diagram" height={280} />
               ) : (
                 <CodeEditor
-                  // @ts-ignore
                   extraControls={null}
                   filename=""
                   height={360}
-                  value={exportData.data}
-                  language={extensionToLanguage[exportData.extension]}
+                  value={exportData.data as string}
+                  language={extensionToLanguage[exportData.extension as keyof typeof extensionToLanguage]}
                   options={{ readOnly: true }}
                   showCopyButton={true}
                 />
@@ -389,8 +391,6 @@ export default function Modal({
                 onChange={(value) =>
                   setExportData((prev) => ({ ...prev, filename: value }))
                 }
-                // @ts-ignore
-                field="filename"
               />
             </>
           );
@@ -511,7 +511,7 @@ export default function Modal({
       okText={getOkText(modal)}
       okButtonProps={{
         disabled:
-          (error && error?.type === STATUS.ERROR) ||
+          (error.type === STATUS.ERROR) ||
           (modal === MODAL.IMPORT &&
             (error.type === STATUS.ERROR || !importData)) ||
           (modal === MODAL.RENAME && title === "") ||

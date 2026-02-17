@@ -1,6 +1,6 @@
 import { Divider, Tooltip } from "@douyinfe/semi-ui";
-import { useTransform, useLayout } from "../hooks";
-import { exitFullscreen } from "../utils/fullscreen";
+import { useTransform, useLayout } from "@hooks";
+import { exitFullscreen } from "@utils/fullscreen";
 import { useTranslation } from "react-i18next";
 
 export default function FloatingControls() {

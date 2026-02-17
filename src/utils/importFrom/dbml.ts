@@ -1,8 +1,8 @@
 import { arrangeTables } from "../arrangeTables";
-import { Cardinality, Constraint, TABLE_CONFIG } from "../../data/constants";
+import { Cardinality, Constraint, TABLE_CONFIG } from "@data/constants";
 import { nanoid } from "nanoid";
 import { getTableHeight } from "../utils";
-import type { ITable, IField, IRelationship, IIndex, IEnum } from "../../types";
+import type { ITable, IField, IRelationship, IIndex, IEnum } from "@types";
 
 // Lazy-loaded parser - initialized only when needed
 let parserInstance: any = null;

@@ -1,7 +1,8 @@
 import React, { RefObject, useLayoutEffect, useState } from "react";
-import { IRelationship } from "../../types";
+import { IRelationship } from "@types";
+import Text from "./Text";
 
-interface RelationshipLabelsProps {
+export interface RelationshipLabelsProps {
   name: string;
   labelX: number;
   labelY: number;
@@ -23,6 +24,10 @@ interface RelationshipLabelsProps {
   nameRotation?: number;
   handleWaypointPointerDown?: (e: React.PointerEvent, index: number) => void;
   dividerIndex?: number;
+  labelOffsetX?: number;
+  labelOffsetY?: number;
+  onDoubleClick?: () => void;
+  setBbox?: (bbox: { x: number; y: number; width: number; height: number } | null) => void;
 }
 
 function RelationshipLabels({
@@ -47,63 +52,68 @@ function RelationshipLabels({
   handleWaypointPointerDown,
   dividerIndex,
   isSelected,
+  labelOffsetX = 0,
+  labelOffsetY = 0,
+  onDoubleClick,
+  setBbox,
 }: RelationshipLabelsProps) {
-  const [bbox, setBbox] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
+    const [localBbox, setLocalBbox] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
 
-  useLayoutEffect(() => {
-    if (labelRef.current) {
-      const newBbox = labelRef.current.getBBox();
-      if (!bbox || newBbox.x !== bbox.x || newBbox.y !== bbox.y || newBbox.width !== bbox.width || newBbox.height !== bbox.height) {
-        setBbox(newBbox);
+    useLayoutEffect(() => {
+      if (labelRef.current) {
+        const newBbox = labelRef.current.getBBox();
+        const currentBbox = localBbox;
+        if (!currentBbox || newBbox.x !== currentBbox.x || newBbox.y !== currentBbox.y || newBbox.width !== currentBbox.width || newBbox.height !== currentBbox.height) {
+          setLocalBbox(newBbox);
+          if (setBbox) {
+            setBbox(newBbox);
+          }
+        }
       }
-    }
-  }, [name, relationshipNameFontSize, nameRotation]);
+    }, [name, relationshipNameFontSize, nameRotation, labelOffsetX, labelOffsetY]);
 
   const padding = 4;
+  const width = localBbox?.width || 0;
+  const height = localBbox?.height || 0;
 
   return (
     <>
-        {showRelationshipNames && (
-          <g
-            className="cursor-move"
-            onPointerDown={(e) => {
-              e.stopPropagation();
-              if (handleWaypointPointerDown) {
-                handleWaypointPointerDown(e, dividerIndex ?? -1);
-              }
-            }}
+      {showRelationshipNames && (
+        <g
+          className="cursor-move"
+          onPointerDown={(e) => {
+            e.stopPropagation();
+            if (handleWaypointPointerDown) {
+              handleWaypointPointerDown(e, dividerIndex ?? -1);
+            }
+          }}
+          onDoubleClick={onDoubleClick}
+          transform={`translate(${labelX - width / 2}, ${labelY - height / 2})`}
+          style={{ pointerEvents: 'all', visibility: localBbox ? 'visible' : 'hidden' }}
+        >
+          <text
+            ref={labelRef}
+            x={0}
+            y={0}
+            style={{ visibility: 'hidden', pointerEvents: 'none' }}
+            dominantBaseline="text-before-edge"
+            fontSize={relationshipNameFontSize}
+            fontWeight={400}
           >
-            <text
-              x={labelX}
-              y={labelY}
-              fill={mode === "dark" ? "lightgrey" : "#333"}
-              fontSize={relationshipNameFontSize}
-              fontWeight={400}
-              ref={labelRef}
-              textAnchor="middle"
-              dominantBaseline="central"
-              className="group-hover:fill-sky-600"
-              style={{ opacity: isAnimated || isHovered ? 0.6 : 1 }}
-              transform={nameRotation !== 0 ? `rotate(${nameRotation}, ${labelX}, ${labelY})` : undefined}
-            >
-              {name}
-            </text>
-            {isSelected && bbox && (
-              <rect
-                x={labelX - bbox.width / 2 - padding}
-                y={labelY - bbox.height / 2 - padding}
-                width={bbox.width + padding * 2}
-                height={bbox.height + padding * 2}
-                fill="none"
-                stroke="#0084d1"
-                strokeWidth={1}
-                strokeDasharray="4, 4"
-                pointerEvents="none"
-                transform={nameRotation !== 0 ? `rotate(${nameRotation}, ${labelX}, ${labelY})` : undefined}
-              />
-            )}
-          </g>
-        )}
+            {name}
+          </text>
+          <Text
+            data={{
+              text: name,
+              color: isSelected ? "#0084d1" : (mode === "dark" ? "lightgrey" : "#333"),
+              fontSize: relationshipNameFontSize,
+              fontWeight: 400,
+              rotation: nameRotation,
+            }}
+            onPointerDown={() => {}}
+          />
+        </g>
+      )}
       {sideLabelStart && showRelationshipLabels && sideLabelStartX !== undefined && sideLabelStartY !== undefined && (
         <text
           x={sideLabelStartX}
@@ -111,7 +121,7 @@ function RelationshipLabels({
           fill={mode === "dark" ? "lightgrey" : "#666"}
           fontSize={relationshipSideLabelFontSize}
           fontWeight={400}
-          textAnchor={sideLabelStartX < (labelX + (labelRef.current?.getBBox().width ?? 0) / 2) ? "start" : "end"}
+          textAnchor={sideLabelStartX < labelX ? "start" : "end"}
           className="group-hover:fill-sky-600"
           style={{ opacity: isAnimated || isHovered ? 0.6 : 1 }}
         >
@@ -125,7 +135,7 @@ function RelationshipLabels({
           fill={mode === "dark" ? "lightgrey" : "#666"}
           fontSize={relationshipSideLabelFontSize}
           fontWeight={400}
-          textAnchor={sideLabelEndX < (labelX + (labelRef.current?.getBBox().width ?? 0) / 2) ? "start" : "end"}
+          textAnchor={sideLabelEndX < labelX ? "start" : "end"}
           className="group-hover:fill-sky-600"
           style={{ opacity: isAnimated || isHovered ? 0.6 : 1 }}
         >

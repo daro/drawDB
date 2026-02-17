@@ -3,9 +3,9 @@ import {
   parseDefault,
   exportFieldComment,
 } from "../exportSQL/shared";
-import { DB } from "../../data/constants";
-import { databases } from "../../data/databases";
-import { dbToTypes } from "../../data/datatypes";
+import { DB } from "@data/constants";
+import { databases } from "@data/databases";
+import { dbToTypes } from "@data/datatypes";
 
 function getQuote(db) {
   if (db === DB.MYSQL || db === DB.MARIADB) return (s) => `\`${s}\``;

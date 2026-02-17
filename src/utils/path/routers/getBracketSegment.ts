@@ -1,10 +1,10 @@
 import { PathArray } from "svg-path-commander";
 import { PathCommander } from "../PathCommander";
-import { IPoint } from "../../../types";
+import { IPoint } from "@types";
 import { getOrthogonalSegments, getManhattanSegments } from "../geometry";
-import { PathOptions, RelationshipData } from "../types";
+import { PathOptions, RelationshipData } from "@types";
 import { inRange } from "lodash";
-import { addToDebugConsole } from "../../../utils/debug";
+import { addToDebugConsole } from "@utils/debug";
 
 /**
  * Pomocnicza funkcja do rysowania segmentu "klamrowego" lub prostego.

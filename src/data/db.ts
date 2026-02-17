@@ -9,7 +9,7 @@ import type {
   ITodo,
   IEnum,
   IType,
-} from "../types";
+} from "@types";
 
 export interface IGroup {
   id: string | number;
@@ -42,16 +42,16 @@ export interface DiagramData {
 export interface TemplateData {
   id?: number;
   custom?: boolean;
-  database: string;
+  database?: string;
   title: string;
   tables: ITable[];
   relationships: IRelationship[];
   notes: INote[];
-  texts: IText[];
+  texts?: IText[];
   subjectAreas: IArea[];
-  todos: ITodo[];
-  pan: { x: number; y: number };
-  zoom: number;
+  todos?: ITodo[];
+  pan?: { x: number; y: number };
+  zoom?: number;
   xorGroups?: IGroup[];
   orGroups?: IGroup[];
   enums?: IEnum[];

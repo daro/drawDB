@@ -7,14 +7,14 @@ import {
   InputNumber,
   Checkbox,
 } from "@douyinfe/semi-ui";
-import { Action, ObjectType } from "../../../data/constants";
+import { Action, ObjectType } from "@data/constants";
 import { IconDeleteStroked } from "@douyinfe/semi-icons";
-import { useDiagram, useLayout, useUndoRedo } from "../../../hooks";
+import { useDiagram, useLayout, useUndoRedo } from "@hooks";
 import { useTranslation } from "react-i18next";
-import { dbToTypes } from "../../../data/datatypes";
-import { databases } from "../../../data/databases";
+import { dbToTypes } from "@data/datatypes";
+import { databases } from "@data/databases";
 
-import { FieldDetailsProps, ITable, IField } from "../../../types";
+import { FieldDetailsProps, ITable, IField } from "@types";
 
 export default function FieldDetails({ data, tid }: FieldDetailsProps) {
   const { t } = useTranslation();

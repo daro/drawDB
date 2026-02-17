@@ -1,9 +1,9 @@
 import ColorPicker from "../../EditorSidePanel/ColorPicker";
 import { Button, Dropdown, Space } from "@douyinfe/semi-ui";
-import { useLayout, useSettings } from "../../../hooks";
+import { useLayout, useSettings } from "@hooks";
 import { IconPlus, IconDeleteStroked, IconChevronDown } from "@douyinfe/semi-icons";
 import { useTranslation } from "react-i18next";
-import { colorPresets } from "../../../data/colorPresets";
+import { colorPresets } from "@data/colorPresets";
 
 export default function SetTableColors() {
   const { layout } = useLayout();
@@ -20,18 +20,18 @@ export default function SetTableColors() {
     }));
   };
 
-  const updateColor = (index, color) => {
+  const updateColor = (index: number, color: string) => {
     const newColors = [...tableColors];
     newColors[index] = color;
     setSettings((prev) => ({ ...prev, tableColors: newColors }));
   };
 
-  const removeColor = (index) => {
+  const removeColor = (index: number) => {
     const newColors = tableColors.filter((_, i) => i !== index);
     setSettings((prev) => ({ ...prev, tableColors: newColors }));
   };
 
-  const applyPreset = (preset) => {
+  const applyPreset = (preset: { colors: string[] }) => {
     setSettings((prev) => ({ ...prev, tableColors: preset.colors }));
   };
 

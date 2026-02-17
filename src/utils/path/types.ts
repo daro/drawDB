@@ -1,4 +1,4 @@
-import { IWaypoint, ITable } from "../../types";
+import { IWaypoint, ITable } from "@types";
 
 export interface Point {
   x: number;

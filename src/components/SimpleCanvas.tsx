@@ -17,18 +17,18 @@ import {
   TABLE_CONFIG,
   Tab,
   State,
-} from "../data/constants";
-import { SimpleCanvasProps, ITable, IRelationship } from "../types";
+} from "@data/constants";
+import { SimpleCanvasProps, ITable, IRelationship } from "@types";
 import OriginalRelationship from "./EditorCanvas/Relationship";
 import OriginalTable from "./EditorCanvas/Table";
-import { DiagramContext } from "../context/DiagramContext";
-import { SettingsContext } from "../context/SettingsContext";
-import { LayoutContext } from "../context/LayoutContext";
-import { SelectContext } from "../context/SelectContext";
-import { CanvasContext } from "../context/CanvasContext";
-import { UndoRedoContext } from "../context/UndoRedoContext";
-import { SaveStateContext } from "../context/SaveStateContext";
-import { TransformContext } from "../context/TransformContext";
+import { DiagramContext } from "@context/DiagramContext";
+import { SettingsContext } from "@context/SettingsContext";
+import { LayoutContext } from "@context/LayoutContext";
+import { SelectContext } from "@context/SelectContext";
+import { CanvasContext } from "@context/CanvasContext";
+import { UndoRedoContext } from "@context/UndoRedoContext";
+import { SaveStateContext } from "@context/SaveStateContext";
+import { TransformContext } from "@context/TransformContext";
 
 function SimpleRelationshipWrapper({
   relationship,

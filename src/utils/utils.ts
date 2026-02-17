@@ -1,6 +1,6 @@
-import { dbToTypes } from "../data/datatypes";
+import { dbToTypes } from "@data/datatypes";
 
-import { TABLE_CONFIG } from "../data/constants";
+import { TABLE_CONFIG } from "@data/constants";
 
 export function dataURItoBlob(dataUrl) {
   const byteString = atob(dataUrl.split(",")[1]);
@@ -97,3 +97,20 @@ export const toSnakeCase = (str: string) =>
     .replace(/([a-z])([A-Z])/g, "$1_$2")
     .replace(/\s+/g, "_")
     .toLowerCase();
+
+/**
+ * Calculates the width of a given text string.
+ * Uses a canvas element for accurate measurement.
+ * 
+ * @param text The text to measure.
+ * @param font The font style string (e.g., "16px sans-serif").
+ * @returns The width of the text in pixels.
+ */
+export function getTextWidth(text: string, font: string): number {
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d");
+  if (!context) return text.length * 10;
+  context.font = font;
+  const metrics = context.measureText(text);
+  return metrics.width;
+}

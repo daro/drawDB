@@ -107,6 +107,19 @@
   background-color: rgba(var(--semi-grey-4), 1);
 }
 
+@keyframes arrow-move {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(-2px); }
+}
+
+.hover-arrow {
+  color: #2f68ad;
+  animation: arrow-move 1s infinite ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .theme {
   color: var(--semi-color-text-1);
   background-color: var(--semi-color-bg-0);
@@ -266,4 +279,13 @@
   stroke: #0084d1;
   stroke-width: 2.5;
   animation: dash-flow 2s ease-in-out infinite;
+}
+
+/* Wyłączenie domyślnej obwódki fokusu dla elementów na płótnie */
+foreignObject *:focus,
+foreignObject *:focus-visible,
+svg g:focus,
+svg g:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
 }

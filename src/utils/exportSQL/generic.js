@@ -1,5 +1,5 @@
-import { DB } from "../../data/constants";
-import { dbToTypes, defaultTypes } from "../../data/datatypes";
+import { DB } from "@data/constants";
+import { dbToTypes, defaultTypes } from "@data/datatypes";
 import { escapeQuotes, getInlineFK, parseDefault } from "./shared";
 
 export function getJsonType(f) {

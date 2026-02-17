@@ -1,7 +1,7 @@
 import { isFunction, isKeyword } from "../utils";
 
-import { DB } from "../../data/constants";
-import { dbToTypes } from "../../data/datatypes";
+import { DB } from "@data/constants";
+import { dbToTypes } from "@data/datatypes";
 
 export function parseDefault(field, database = DB.GENERIC) {
   if (

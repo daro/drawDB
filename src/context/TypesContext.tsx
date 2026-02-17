@@ -1,10 +1,10 @@
 import { createContext, useState, ReactNode, Dispatch, SetStateAction } from "react";
-import { Action, ObjectType } from "../data/constants";
-import { useUndoRedo } from "../hooks";
+import { Action, ObjectType } from "@data/constants";
+import { useUndoRedo } from "@hooks";
 import { Toast } from "@douyinfe/semi-ui";
 import { useTranslation } from "react-i18next";
 import { nanoid } from "nanoid";
-import { IType } from "../types";
+import { IType } from "@types";
 
 interface TypesContextType {
   types: IType[];

@@ -1,6 +1,6 @@
 import { createContext, useState, ReactNode, Dispatch, SetStateAction } from "react";
-import { ObjectType, Tab } from "../data/constants";
-import { IWaypoint } from "../types";
+import { ObjectType, Tab } from "@data/constants";
+import { IWaypoint } from "@types";
 
 export interface ISelectedElement {
   element: number;
@@ -28,6 +28,7 @@ interface SelectContextType {
   setSelectedElement: Dispatch<SetStateAction<ISelectedElement>>;
   bulkSelectedElements: IBulkSelectedElement[];
   setBulkSelectedElements: Dispatch<SetStateAction<IBulkSelectedElement[]>>;
+  emitSelect: (id: string | number, type: number, event: React.PointerEvent | PointerEvent) => void;
 }
 
 export const SelectContext = createContext<SelectContextType>({
@@ -42,6 +43,7 @@ export const SelectContext = createContext<SelectContextType>({
   setSelectedElement: () => {},
   bulkSelectedElements: [],
   setBulkSelectedElements: () => {},
+  emitSelect: () => {},
 });
 
 export default function SelectContextProvider({ children }: { children: ReactNode }) {
@@ -56,6 +58,15 @@ export default function SelectContextProvider({ children }: { children: ReactNod
   });
   const [bulkSelectedElements, setBulkSelectedElements] = useState<IBulkSelectedElement[]>([]);
 
+  const emitSelect = (id: string | number, type: number, event: React.PointerEvent | PointerEvent) => {
+    const isModifierPressed = event.ctrlKey || event.metaKey;
+    console.log(`[SelectEvent] id: ${id}, type: ${type}, eventType: ${event.type}, modifier: ${isModifierPressed}`);
+    const customEvent = new CustomEvent("element-select", {
+      detail: { id, type, event, isModifierPressed },
+    });
+    window.dispatchEvent(customEvent);
+  };
+
   return (
     <SelectContext.Provider
       value={{
@@ -63,6 +74,7 @@ export default function SelectContextProvider({ children }: { children: ReactNod
         setSelectedElement,
         bulkSelectedElements,
         setBulkSelectedElements,
+        emitSelect,
       }}
     >
       {children}

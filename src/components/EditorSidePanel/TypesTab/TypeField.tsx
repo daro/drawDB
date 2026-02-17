@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Action, ObjectType } from "../../../data/constants";
+import { Action, ObjectType } from "@data/constants";
 import {
   Row,
   Col,
@@ -17,11 +17,11 @@ import {
   useDiagram,
   useEnums,
   useLayout,
-} from "../../../hooks";
+} from "@hooks";
 import { useTranslation } from "react-i18next";
-import { dbToTypes } from "../../../data/datatypes";
+import { dbToTypes } from "@data/datatypes";
 
-import { TypeFieldProps, ITypeField } from "../../../types";
+import { TypeFieldProps, ITypeField } from "@types";
 
 export default function TypeField({ data, tid, fid }: TypeFieldProps) {
   const { types, updateType } = useTypes();

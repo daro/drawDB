@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
-import { useDiagram, useSettings, useSelect } from "../../hooks";
-import { ObjectType } from "../../data/constants";
-import { calcGroupPoints, calcGroupPath } from "../../utils/calcGroupPath";
+import { useDiagram, useSettings, useSelect } from "@hooks";
+import { ObjectType } from "@data/constants";
+import { calcGroupPoints, calcGroupPath } from "@utils/calcGroupPath";
 
 interface GroupArcProps {
   data: {
@@ -16,7 +16,7 @@ interface GroupArcProps {
 export default function GroupArc({ data, type, onPointerDown }: GroupArcProps) {
   const { tables, relationships } = useDiagram();
   const { settings } = useSettings();
-  const { selectedElement, setSelectedElement, bulkSelectedElements } = useSelect();
+  const { selectedElement, setSelectedElement, bulkSelectedElements, emitSelect } = useSelect();
 
   const isSelected =
     (selectedElement.id === data.id &&
@@ -63,6 +63,7 @@ export default function GroupArc({ data, type, onPointerDown }: GroupArcProps) {
       onPointerDown={(e) => {
         if (e.defaultPrevented) return;
         onPointerDown(e);
+        emitSelect(data.id, type === "XOR" ? ObjectType.XOR_GROUP : ObjectType.OR_GROUP, e);
       }}
       onDoubleClick={(e) => {
         e.stopPropagation();

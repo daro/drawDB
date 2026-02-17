@@ -9,3 +9,5 @@ export { default as IconOneToOne } from "./IconOneToOne";
 export { default as IconOneToMany } from "./IconOneToMany";
 export { default as IconManyToMany } from "./IconManyToMany";
 export { default as IconRelationshipAuto } from "./IconRelationshipAuto";
+export { default as IconWaypoint } from "./IconWaypoint";
+export { default as IconDivider } from "./IconDivider";

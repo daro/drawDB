@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { TasksContext } from "../context/TasksContext";
+import { TasksContext } from "@context/TasksContext";
 
 export default function useTasks() {
   return useContext(TasksContext);

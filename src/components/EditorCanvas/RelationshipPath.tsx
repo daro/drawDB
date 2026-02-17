@@ -1,8 +1,8 @@
 import React from "react";
-import { Cardinality, ObjectType, TABLE_CONFIG } from "../../data/constants";
-import { IRelationship, ITable } from "../../types";
-import { RenderablePath } from "../../utils/calcPath";
-import { PathCommander } from "../../utils/path/PathCommander";
+import { Cardinality, ObjectType, TABLE_CONFIG } from "@data/constants";
+import { IRelationship, ITable } from "@types";
+import { RenderablePath } from "@utils/calcPath";
+import { PathCommander } from "@utils/path/PathCommander";
 
 interface RelationshipPathProps {
   data: IRelationship;
@@ -24,6 +24,8 @@ interface RelationshipPathProps {
   bulkSelectedElements: any[];
   setBulkSelectedElements: (val: any | ((prev: any[]) => any[])) => void;
   onPointerDown: (e: React.PointerEvent) => void;
+  edit?: (e: React.MouseEvent) => void;
+  emitSelect: (id: string | number, type: number, event: React.PointerEvent | PointerEvent) => void;
 }
 
 const RelationshipPath: React.FC<RelationshipPathProps> = ({
@@ -46,6 +48,8 @@ const RelationshipPath: React.FC<RelationshipPathProps> = ({
   bulkSelectedElements,
   setBulkSelectedElements,
   onPointerDown,
+  edit,
+  emitSelect,
 }) => {
   const isOneToOne = data.cardinality === Cardinality.ONE_TO_ONE || 
                    data.cardinality === t(Cardinality.ONE_TO_ONE);
@@ -71,31 +75,11 @@ const RelationshipPath: React.FC<RelationshipPathProps> = ({
   const isDashed = data.identifying === false || (dividerWp && data.identifying !== false && (isOneToMany || isManyToOne));
 
   const handlePointerDownWithBulk = (e: React.PointerEvent) => {
+    if (e.defaultPrevented) return;
+    if (e.button !== 0) return;
     onPointerDown(e);
     e.stopPropagation();
-    const elementInBulk = { id: data.id, type: ObjectType.RELATIONSHIP };
-    if (!(e.ctrlKey || e.metaKey)) {
-      setBulkSelectedElements([elementInBulk]);
-      setSelectedElement({
-        ...selectedElement,
-        id: data.id,
-        element: ObjectType.RELATIONSHIP,
-        open: false,
-      });
-    } else {
-      const isAlreadyInBulk = bulkSelectedElements.some(
-        (el) => el.type === ObjectType.RELATIONSHIP && el.id === data.id
-      );
-      if (isAlreadyInBulk) {
-        setBulkSelectedElements((prev) =>
-          prev.filter(
-            (el) => !(el.type === ObjectType.RELATIONSHIP && el.id === data.id)
-          )
-        );
-      } else {
-        setBulkSelectedElements((prev) => [...prev, elementInBulk]);
-      }
-    }
+    emitSelect(data.id, ObjectType.RELATIONSHIP, e);
   };
 
   const renderDebugPath = () => pathSegments.map((segment, idx) => {
@@ -163,23 +147,13 @@ const RelationshipPath: React.FC<RelationshipPathProps> = ({
 
   return (
     <>
-       Invisible wider path for better hover UX
-      <path
-        d={pathD}
-        fill="none"
-        stroke="transparent"
-        strokeWidth={12}
-        strokeLinejoin="round"
-        cursor="pointer"
-        onPointerDown={onPointerDown}
-      />
-
       {/* Hidden path for measurement */}
       <path ref={measurePathRef} d={pathD} fill="none" stroke="none" pointerEvents="none" />
 
        Main relationship path group
       <g className="relationship-path"
-         onPointerDown={handlePointerDownWithBulk}>
+         onPointerDown={handlePointerDownWithBulk}
+         onDoubleClick={edit}>
         {settings.debugPath ? renderDebugPath() : (
           <path
             d={pathD}
@@ -195,11 +169,22 @@ const RelationshipPath: React.FC<RelationshipPathProps> = ({
         )}
       </g>
 
-       {/*Overlays (Animations, Divider Solid Overlap) */}
       <g pointerEvents="none">
         {renderDividerOverlap()}
         {renderAnimationLayer()}
       </g>
+
+      {/* Invisible wider path for better hover UX - placed here to be on top of dashed lines */}
+      <path
+        d={pathD}
+        fill="none"
+        stroke="transparent"
+        strokeWidth={12}
+        strokeLinejoin="round"
+        cursor="pointer"
+        onPointerDown={handlePointerDownWithBulk}
+        onDoubleClick={edit}
+      />
     </>
   );
 };

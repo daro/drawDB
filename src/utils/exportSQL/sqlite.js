@@ -1,6 +1,6 @@
 import { exportFieldComment, getInlineFK, parseDefault } from "./shared";
 
-import { dbToTypes } from "../../data/datatypes";
+import { dbToTypes } from "@data/datatypes";
 
 export function toSqlite(diagram) {
   return diagram.tables

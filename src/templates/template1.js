@@ -1,4 +1,4 @@
-import { Cardinality } from "../data/constants";
+import { Cardinality } from "@data/constants";
 
 export const template1 = {
   tables: [

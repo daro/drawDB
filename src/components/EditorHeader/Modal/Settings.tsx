@@ -1,5 +1,5 @@
-import { useLayout, useSettings, useTransform, useDiagram, useAreas, useNotes, useFullscreen } from "../../../hooks";
-import { Typography, Toast, Nav } from "@douyinfe/semi-ui";
+import { useLayout, useSettings, useTransform, useDiagram, useAreas, useNotes, useFullscreen } from "@hooks";
+import { Typography, Toast, Nav, Tooltip } from "@douyinfe/semi-ui";
 import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
 import {
@@ -9,8 +9,8 @@ import {
   IconSetting,
   IconLanguage,
 } from "@douyinfe/semi-icons";
-import { enterFullscreen, exitFullscreen } from "../../../utils/fullscreen";
-import { NOTE_CONFIG } from "../../../data/constants";
+import { enterFullscreen, exitFullscreen } from "@utils/fullscreen";
+import { NOTE_CONFIG } from "@data/constants";
 import UIVisibility from "./SettingsSections/UIVisibility";
 import DiagramDisplay from "./SettingsSections/DiagramDisplay";
 import ColorAndTheme from "./SettingsSections/ColorAndTheme";
@@ -23,13 +23,22 @@ export const SettingItem = ({
   id,
   label,
   children,
+  tooltip,
 }: {
   id: string;
   label: string;
   children: React.ReactNode;
+  tooltip?: string;
 }) => (
   <div id={id} className="flex justify-between items-center py-2 px-1 rounded transition-colors group">
-    <Text className="group-hover:text-blue-500 transition-colors">{label}</Text>
+    <div className="flex items-center gap-2">
+      <Text className="group-hover:text-blue-500 transition-colors">{label}</Text>
+      {tooltip && (
+        <Tooltip content={tooltip} position="right">
+          <i className="fa-solid fa-circle-info text-zinc-400 group-hover:text-blue-400 transition-colors cursor-help text-xs" />
+        </Tooltip>
+      )}
+    </div>
     {children}
   </div>
 );

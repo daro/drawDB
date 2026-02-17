@@ -1,11 +1,11 @@
 import { Input, Button } from "@douyinfe/semi-ui";
 import { IconDeleteStroked } from "@douyinfe/semi-icons";
-import { useDiagram, useUndoRedo, useLayout } from "../../../hooks";
+import { useDiagram, useUndoRedo, useLayout } from "@hooks";
 import { useTranslation } from "react-i18next";
-import { Action, ObjectType } from "../../../data/constants";
+import { Action, ObjectType } from "@data/constants";
 import { useState, useMemo } from "react";
 
-import { GroupInfoProps } from "../../../types";
+import { GroupInfoProps } from "@types";
 
 export default function XorGroupInfo({ data }: GroupInfoProps) {
   const { updateXorGroup, deleteXorGroup, tables, relationships } = useDiagram();

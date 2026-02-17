@@ -1,5 +1,5 @@
 import React from "react";
-import { GRID_CONFIG } from "../../data/constants";
+import { GRID_CONFIG } from "@data/constants";
 
 interface GridBackgroundProps {
   show: boolean;

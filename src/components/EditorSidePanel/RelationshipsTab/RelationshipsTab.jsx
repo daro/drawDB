@@ -1,12 +1,12 @@
 import { Collapse, Button } from "@douyinfe/semi-ui";
-import { useSelect, useDiagram, useSaveState, useLayout } from "../../../hooks";
+import { useSelect, useDiagram, useSaveState, useLayout } from "@hooks";
 import { useMemo } from "react";
 import Empty from "../Empty";
 import SearchBar from "./SearchBar";
 import RelationshipInfo from "./RelationshipInfo";
 import XorGroupInfo from "./XorGroupInfo";
 import OrGroupInfo from "./OrGroupInfo";
-import { ObjectType, State } from "../../../data/constants";
+import { ObjectType, State } from "@data/constants";
 import { useTranslation } from "react-i18next";
 import { SortableList } from "../../SortableList/SortableList";
 import { DragHandle } from "../../SortableList/DragHandle";

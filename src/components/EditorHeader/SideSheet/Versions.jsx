@@ -21,11 +21,11 @@ import {
   useNotes,
   useTransform,
   useTypes,
-} from "../../../hooks";
-import { databases } from "../../../data/databases";
-import { loadCache, saveCache } from "../../../utils/cache";
+} from "@hooks";
+import { databases } from "@data/databases";
+import { loadCache, saveCache } from "@utils/cache";
 import Migration from "./Migration";
-import { DB } from "../../../data/constants";
+import { DB } from "@data/constants";
 
 const LIMIT = 10;
 

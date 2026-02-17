@@ -1,9 +1,9 @@
 import { Toast } from "@douyinfe/semi-ui";
 import { createContext, useState, ReactNode, Dispatch, SetStateAction } from "react";
 import { useTranslation } from "react-i18next";
-import { Action, ObjectType, TABLE_CONFIG } from "../data/constants";
-import { useSelect, useTransform, useUndoRedo } from "../hooks";
-import { IArea } from "../types";
+import { Action, ObjectType, TABLE_CONFIG, GRID_CONFIG } from "@data/constants";
+import { useSelect, useTransform, useUndoRedo, useSettings } from "@hooks";
+import { IArea } from "@types";
 import { nanoid } from "nanoid";
 
 interface AreasContextType {
@@ -28,6 +28,7 @@ export default function AreasContextProvider({ children }: { children: ReactNode
   const { t } = useTranslation();
   const [areas, setAreas] = useState<IArea[]>([]);
   const { transform } = useTransform();
+  const { settings } = useSettings();
   const { selectedElement, setSelectedElement } = useSelect();
   const { setUndoStack, setRedoStack } = useUndoRedo();
 
@@ -41,11 +42,17 @@ export default function AreasContextProvider({ children }: { children: ReactNode
     } else {
       const width = 200;
       const height = 200;
+      let x = transform.pan.x - width / 2;
+      let y = transform.pan.y - height / 2;
+      if (settings.snapToGrid) {
+        x = Math.round(x / GRID_CONFIG.SIZE) * GRID_CONFIG.SIZE;
+        y = Math.round(y / GRID_CONFIG.SIZE) * GRID_CONFIG.SIZE;
+      }
       const newArea: IArea = {
         id: nanoid(),
         name: `area_${areas.length}`,
-        x: transform.pan.x - width / 2,
-        y: transform.pan.y - height / 2,
+        x,
+        y,
         width,
         height,
         color: TABLE_CONFIG.DEFAULT_BLUE,

@@ -1,6 +1,6 @@
 // @ts-nocheck
 import JSZip from "jszip";
-import { db } from "../data/db";
+import { db } from "@data/db";
 import { saveAs } from "file-saver";
 
 const zip = new JSZip();

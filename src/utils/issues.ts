@@ -1,5 +1,5 @@
-import { dbToTypes } from "../data/datatypes";
-import i18n from "../i18n/i18n";
+import { dbToTypes } from "@data/datatypes";
+import i18n from "@i18n/i18n";
 import { isFunction } from "./utils";
 
 function checkDefault(field, database) {

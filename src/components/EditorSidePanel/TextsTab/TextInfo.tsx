@@ -1,12 +1,12 @@
 import { Input, Button, Row, Col, InputNumber, Select, TextArea } from "@douyinfe/semi-ui";
 import { IconDeleteStroked } from "@douyinfe/semi-icons";
-import { useTexts, useUndoRedo, useLayout } from "../../../hooks";
+import { useTexts, useUndoRedo, useLayout } from "@hooks";
 import { useTranslation } from "react-i18next";
-import { Action, ObjectType } from "../../../data/constants";
+import { Action, ObjectType } from "@data/constants";
 import { useState } from "react";
 import ColorPicker from "../ColorPicker";
 
-import { TextInfoProps, IText } from "../../../types";
+import { TextInfoProps, IText } from "@types";
 
 export default function TextInfo({ data }: TextInfoProps) {
   const { updateText, deleteText } = useTexts();
@@ -62,6 +62,20 @@ export default function TextInfo({ data }: TextInfoProps) {
               max={100}
             />
           </Col>
+          <Col span={12}>
+            <div className="text-md font-semibold mb-2">{t("rotation")} (°):</div>
+            <InputNumber
+              value={data.rotation || 0}
+              onChange={(val) => handleUpdate({ rotation: val })}
+              onFocus={(e) => setEditField({ ...editField, rotation: parseFloat(e.target.value) })}
+              onBlur={(e) => handleBlur("rotation", parseFloat(e.target.value))}
+              readOnly={layout.readOnly}
+              min={-360}
+              max={360}
+            />
+          </Col>
+        </Row>
+        <Row gutter={8}>
           <Col span={12}>
             <div className="text-md font-semibold mb-2">{t("font_weight")}:</div>
             <Select
